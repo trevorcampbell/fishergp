@@ -1,5 +1,5 @@
 import autograd.numpy as np
-from gpcoreset import SubsampleGP, SubsetRegressorsGP, NystromGP, CoresetGP, InducingGP, VariationalGP, expkern, optimize_hyperparameters
+from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP,  InducingGP, VariationalGP, expkern, optimize_hyperparameters
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 
@@ -56,23 +56,23 @@ kern = lambda X, Y=None, diag=False : expkern(X, Y, gamma=length_scales, sigma=k
 
 print('Naive mean error')
 mu_mean = Y.mean()
-print 'Normalized Error: ' + str(np.sqrt( (( mu_mean - Yt)**2).sum())/Ytnorm)
-print 'RMS Error: ' + str(np.sqrt( (( mu_mean - Yt)**2).mean()))
+print('Normalized Error: ' + str(np.sqrt( (( mu_mean - Yt)**2).sum())/Ytnorm))
+print('RMS Error: ' + str(np.sqrt( (( mu_mean - Yt)**2).mean())))
 
 print('Training subsample GP')
 gp = SubsampleGP(X, Y, kern, likelihood_variance)
 gp.train(subsample_idcs=idcs, ridge=ridge)
 mu_s, sig_s = gp.predict_y(Xt, cov_type='diag')
 mu_s = mu_s.flatten()
-print 'Normalized Error: ' + str(np.sqrt( (( mu_s - Yt)**2).sum())/Ytnorm)
-print 'RMS Error: ' + str(np.sqrt( (( mu_s - Yt)**2).mean()))
+print('Normalized Error: ' + str(np.sqrt( (( mu_s - Yt)**2).sum())/Ytnorm))
+print('RMS Error: ' + str(np.sqrt( (( mu_s - Yt)**2).mean())))
 
 gp = VariationalGP(X, Y, length_scales, kernel_variance, likelihood_variance)
 print('Training sparse variational GP')
 gp.train(X[idcs, :])
 mu_svgp, sig_svgp = gp.predict_y(Xt, cov_type='diag')
 mu_svgp = mu_svgp.flatten()
-print np.sqrt(((mu_svgp - Yt)**2).sum())/Ytnorm
+print(np.sqrt(((mu_svgp - Yt)**2).sum())/Ytnorm)
 
 
 print('Training nystrom GP')
@@ -80,8 +80,8 @@ gp = NystromGP(X, Y, kern, likelihood_variance)
 gp.train(subsample_idcs=idcs, ridge=ridge)
 mu_n, sig_n = gp.predict_y(Xt, cov_type='diag')
 mu_n = mu_n.flatten()
-print 'Normalized Error: ' + str(np.sqrt( (( mu_n - Yt)**2).sum())/Ytnorm)
-print 'RMS Error: ' + str(np.sqrt( (( mu_n - Yt)**2).mean()))
+print('Normalized Error: ' + str(np.sqrt( (( mu_n - Yt)**2).sum())/Ytnorm))
+print('RMS Error: ' + str(np.sqrt( (( mu_n - Yt)**2).mean())))
 
 
 
@@ -90,8 +90,8 @@ gp = SubsetRegressorsGP(X, Y, kern, likelihood_variance)
 gp.train(subsample_idcs=idcs, ridge=ridge)
 mu_sr, sig_sr = gp.predict_y(Xt, cov_type='diag')
 mu_sr = mu_sr.flatten()
-print 'Normalized Error: ' + str(np.sqrt( (( mu_sr - Yt)**2).sum())/Ytnorm)
-print 'RMS Error: ' + str(np.sqrt( (( mu_sr - Yt)**2).mean()))
+print('Normalized Error: ' + str(np.sqrt( (( mu_sr - Yt)**2).sum())/Ytnorm))
+print('RMS Error: ' + str(np.sqrt( (( mu_sr - Yt)**2).mean())))
 
 
 igp = InducingGP(X, Y, kern, likelihood_variance)
@@ -99,7 +99,7 @@ print('Training inducing GP')
 igp.train(subsample_idcs=idcs, ridge=ridge)
 mu_ind, sig_ind = igp.predict_y(Xt, cov_type='diag')
 mu_ind = mu_ind.flatten()
-print np.sqrt(((mu_ind - Yt)**2).sum())/Ytnorm
+print(np.sqrt(((mu_ind - Yt)**2).sum())/Ytnorm)
 
 #cgp = CoresetGP(X, Y, kern, likelihood_variance)
 #print('Training coreset GP')

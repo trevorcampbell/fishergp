@@ -1,5 +1,5 @@
 import numpy as np
-from gpcoreset import SubsampleGP, SubsetRegressorsGP, NystromGP, InducingGP, VariationalGP, Linear, optimize_hyperparameters
+from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP, InducingGP, VariationalGP, Linear, optimize_hyperparameters
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 
