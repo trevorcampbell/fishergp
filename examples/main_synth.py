@@ -1,5 +1,5 @@
 import numpy as np
-from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP, InducingGP, VariationalGP, Linear, optimize_hyperparameters
+from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP, FisherGP, VariationalGP, Linear
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 
@@ -78,7 +78,7 @@ sridcs = np.arange(N)
 np.random.shuffle(sridcs)
 sridcs = sridcs[:N_srknots]
 #plot inducing pts 
-gp = InducingGP(X, Y, gamma*np.ones(X.shape[1]), kernel_var, likelihood_var)
+gp = FisherGP(X, Y, gamma*np.ones(X.shape[1]), kernel_var, likelihood_var)
 gp.pretrain(sridcs)
 gp.train(idcs)
 mu_ind, sig_ind = gp.predict_y(xg[:, np.newaxis], cov_type='diag')
@@ -130,7 +130,7 @@ bkp.show(bkl.gridplot([[fig_inducing, fig_variational, fig_subset_regressors]]))
 #np.random.shuffle(sridcs)
 #sridcs = sridcs[:N_srknots]
 ##plot inducing pts 
-#igp = InducingGP(X, Y, gamma*np.ones(X.shape[1]), kernel_var, likelihood_var)
+#igp = FisherGP(X, Y, gamma*np.ones(X.shape[1]), kernel_var, likelihood_var)
 #igp.pretrain(sridcs)
 #igp.train(idcs)
 #mu_ind, sig_ind = igp.predict_f(xg[:, np.newaxis], cov_type='diag')

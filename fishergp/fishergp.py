@@ -280,7 +280,7 @@ class VariationalGP(GP):
       return mu, sig.flatten()
 
 
-class InducingGP(GP):
+class FisherGP(GP):
 
   def pretrain(self, subsample_idcs, ridge=1e-9):
     self.sridcs = np.sort(subsample_idcs)
