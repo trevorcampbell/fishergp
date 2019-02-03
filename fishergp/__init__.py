@@ -1,1 +1,1 @@
-from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP, Linear, VariationalGP, FisherGP
+from . import SubsampleGP, SubsetRegressorsGP, NystromGP, Linear, VariationalGP, FisherGP
