@@ -45,6 +45,10 @@ datasets = [lambda s : gen_from_file('wine', 3898, 1000, s),
             lambda s : gen_from_file('kin8nm', 6192, 2000, s)]
             #lambda s : gen_from_file('sarcos', 30484, 14000, s)]
 
+
+
+
+
 dnms = ['synthetic']
 n_pretrain = [100]
 datasets = [lambda s : gen_synthetic(1000, 1000, s)]
@@ -56,6 +60,13 @@ n_trials = 10
 n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))
 #n_inducing = np.unique(np.logspace(0, 2, 5, dtype=np.int))
 n_inducing_hyperopt = 200
+
+
+n_trials = 10
+n_inducing = np.array([2, 5, 10], dtype=np.int64)
+
+
+
 
 #run trials, loading each dataset
 for k in range(len(datasets)):

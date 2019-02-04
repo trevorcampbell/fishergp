@@ -73,7 +73,7 @@ def errorbar(fig, x, y, xerr=None, yerr=None, color='red',
           y_err_y.append((py - err, py + err))
       fig.multi_line(y_err_x, y_err_y, color=color, **error_kwargs)
 
-anms_dict = {'subset_regressors' : 'SoR', 'variational_inducing' : 'VFE', 'fisher_inducing' : 'pF-DTC', 'full' : 'exact', 'subsample' : 'subsample'}
+anms_dict = {'subset_regressors' : 'SoR', 'variational_inducing' : 'VFE', 'fisher_inducing' : 'pF-DTC', 'full' : 'exact', 'subsample' : 'subsample', 'linear' : 'linear'}
 
 dset_sizes = dict(synthetic=1000, delays10k=8000, ccpp=7568,
                   abalone=3177, airfoil=1103, wine=3898)
@@ -145,7 +145,7 @@ for k in range(len(dnms)):
         cput_std = train_cputs[j, :, :].std(axis=0)
 
         if legend:
-            anm_legend = anms_dict[anms[j].decode("utf-8")]
+            anm_legend = anms_dict[anms[j]] #.decode("utf-8")]
         else:
             anm_legend = None
 
