@@ -155,23 +155,25 @@ class NystromGP(GP):
 
     return mu, sig
 
-class Linear(GP):
-  def __init__(self, X, Y):
+class Linear(SubsampleGP):
+  def __init__(self, X, Y, likelihood_variance):
     self.X = X
     self.Y = Y
+    self.k = lambda U, V=None : U.dot(V.T) if V is not None else U.dot(U.T)
+    self.lvar = likelihood_variance
 
-  def train(self, subsample_idcs):
-    XTX = np.dot(self.X.T, self.X)
-    XTY = np.dot(self.X.T, self.Y)
-    self.alpha = np.linalg.solve(XTX, XTY)
+  #def train(self, subsample_idcs):
+  #  XTX = np.dot(self.X.T, self.X)
+  #  XTY = np.dot(self.X.T, self.Y)
+  #  self.alpha = np.linalg.solve(XTX, XTY)
 
-  def predict_f(self, Xt, cov_type='full'):
-    mu = np.dot(Xt, self.alpha)
-    sig = np.zeros((mu.shape[0], mu.shape[0]))
-    if cov_type == 'full':
-      return mu, sig
-    else:
-      return mu, np.diag(sig).copy()
+  #def predict_f(self, Xt, cov_type='full'):
+  #  mu = np.dot(Xt, self.alpha)
+  #  sig = np.zeros((mu.shape[0], mu.shape[0]))
+  #  if cov_type == 'full':
+  #    return mu, sig
+  #  else:
+  #    return mu, np.diag(sig).copy()
 
 
 #this class is essentially a wrapper around GPy

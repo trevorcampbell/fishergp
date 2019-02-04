@@ -99,6 +99,7 @@ for k in range(len(dnms)):
     lsc_errs = res['lsc_errs']
     kvar_errs = res['kvar_errs']
     lvar_errs = res['lvar_errs']
+    kl = res['kl_divergences']
 
     res = np.load('results/'+dnms[k]+'_'+str(d_seed)+'_full_results.npz')
     mu_pred_full = res['mu_pred_full']
@@ -107,6 +108,7 @@ for k in range(len(dnms)):
     pred_cput_full = res['pred_cput_full']
     train_cput_full = res['train_cput_full']
 
+    f_kl_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Test Prediction Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pe_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Test Prediction Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pme_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pse_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error', x_axis_type='log', x_axis_label='# Inducing Pts')
@@ -119,7 +121,7 @@ for k in range(len(dnms)):
 
     hypchg_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='Relative HyperParam Change', x_axis_type='log', x_axis_label='# Inducing Pts')
 
-    for f in [f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni, hypchg_vs_ni]:
+    for f in [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni, hypchg_vs_ni]:
         f.xaxis.axis_label_text_font_size= font_size
         f.xaxis.major_label_text_font_size= font_size
         f.xaxis.formatter = logFmtr
@@ -127,8 +129,6 @@ for k in range(len(dnms)):
         f.yaxis.major_label_text_font_size= font_size
         f.yaxis.formatter = logFmtr
         f.title.text_font_size = font_size
-
-
 
     if legend:
         f_pe_vs_ni.line(n_inducing, pred_err_full*np.ones(n_inducing.shape[0]), legend=anms_dict['full'], line_width=7, line_color='black')
@@ -157,6 +157,7 @@ for k in range(len(dnms)):
         f_pe_vs_ni.line(eff_num_inducing, pe_mean, legend=anm_legend, line_width=7, line_color=colors[j])
         #f_pe_vs_cput.line(cput_mean, pe_mean, legend=anm_legend, line_width=7, line_color=colors[j])
 
+        kl_mean = kl_divergences[j, :, :].mean(axis=1)
         pme_mean = post_mean_errs[j, :, :].mean(axis=1)
         pme_std = post_mean_errs[j, :, :].std(axis=1)
         pme_best = post_mean_errs[j, :, :].min(axis=1)
@@ -164,6 +165,7 @@ for k in range(len(dnms)):
         pse_std = post_sig_errs[j, :, :].std(axis=1)
         pse_best = post_sig_errs[j, :, :].min(axis=1)
 
+        f_kl_vs_ni.line(eff_num_inducing[:-1], kl_mean[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
         f_pme_vs_ni.line(eff_num_inducing[:-1], pme_mean[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
         f_pse_vs_ni.line(eff_num_inducing[:-1], pse_mean[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
         f_pme_best_vs_ni.line(eff_num_inducing[:-1], pme_best[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
@@ -180,7 +182,7 @@ for k in range(len(dnms)):
             hypchg_vs_ni.line(n_inducing, kvar_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
             hypchg_vs_ni.line(n_inducing, lvar_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
 
-    for f in [f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni, hypchg_vs_ni]:
+    for f in [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni, hypchg_vs_ni]:
         f.legend.label_text_font_size= font_size
         f.legend.glyph_width=100
         f.legend.glyph_height=40
@@ -197,7 +199,7 @@ for k in range(len(dnms)):
 
 
     #bkp.show(bkl.gridplot([[f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni], [f_pe_vs_cput, f_pme_vs_cput, f_pse_vs_cput]]))
-    figs = [f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni,  hypchg_vs_ni]
+    figs = [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni,  hypchg_vs_ni]
     if pngs:
         for i, f in enumerate(figs):
             export_png(f, 'figures/%s%d.png' % (dnms[k], i+1))

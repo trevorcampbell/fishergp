@@ -10,6 +10,16 @@ import time
 import os
 import GPy
 
+def kl_gaussian(mu1, Sig1, mu2, Sig2, ridge=1e-9):
+  r = ridge*np.eye(mu1.shape[0])
+  print(np.linalg.eigvalsh(Sig1+r).min())
+  print(np.linalg.eigvalsh(Sig2+r).min())
+  k1 = np.trace(np.linalg.solve(Sig2+r, Sig1+r))
+  k2 = (mu1-mu2).T.dot( np.linalg.solve(Sig2+r, mu1-mu2   ))
+  k3 = np.linalg.slogdet(Sig2+r)[1] - np.linalg.slogdet(Sig1+r)[1]
+  return 0.5*( k1 + k2 + k3 - mu1.shape[0] )
+
+
 #GPy.kern.RBF(input_dim=X.shape[1], lengthscale=self.k.gamma, ARD=True, variance=self.k.sigma)
 
 
@@ -110,7 +120,7 @@ for k in range(len(datasets)):
   #create the model objects
   print('Creating models')
   gp = SubsampleGP(X, Y, kern, likelihood_variance)
-  lin = Linear(X, Y)
+  lin = Linear(X, Y, likelihood_variance)
   sgp = SubsampleGP(X, Y, kern, likelihood_variance)
   srgp = SubsetRegressorsGP(X, Y, kern, likelihood_variance)
   vgp = VariationalGP(X, Y, gpykern, likelihood_variance)
@@ -127,6 +137,7 @@ for k in range(len(datasets)):
     fres = np.load(full_results_fn)
     mu_pred_full = fres['mu_pred_full']
     sig_pred_full = fres['sig_pred_full']
+    var_pred_full = fres['var_pred_full']
     pred_err_full = fres['pred_err_full']
     pred_cput_full = fres['pred_cput_full']
     train_cput_full = fres['train_cput_full']
@@ -136,11 +147,11 @@ for k in range(len(datasets)):
     gp.train(np.arange(X.shape[0]))
     train_cput_full = time.time()-t0
     t0 = time.time()
-    mu_pred_full, sig_pred_full = gp.predict_f(Xt, cov_type='diag')
-    sig_pred_full = np.sqrt(sig_pred_full)
+    mu_pred_full, var_pred_full = gp.predict_f(Xt, cov_type='full')
+    sig_pred_full = np.sqrt(np.diag(var_pred_full))
     pred_cput_full = time.time()-t0 
     pred_err_full = np.sqrt(((mu_pred_full - Yt)**2).mean())
-    np.savez(full_results_fn, mu_pred_full=mu_pred_full, sig_pred_full=sig_pred_full, 
+    np.savez(full_results_fn, mu_pred_full=mu_pred_full, sig_pred_full=sig_pred_full, var_pred_full=var_pred_full,
                              train_cput_full=train_cput_full, pred_cput_full=pred_cput_full, pred_err_full=pred_err_full)
      
   #initialize results matrices
@@ -150,6 +161,7 @@ for k in range(len(datasets)):
   pred_errs = np.zeros((len(algs), n_inducing.shape[0], n_trials))
   post_mean_errs = np.zeros((len(algs), n_inducing.shape[0], n_trials))
   post_sig_errs = np.zeros((len(algs), n_inducing.shape[0], n_trials))
+  kl_divergences = np.zeros((len(algs), n_inducing.shape[0], n_trials))
   lsc_errs = np.zeros((2, n_inducing.shape[0], n_trials))
   kvar_errs = np.zeros((2, n_inducing.shape[0], n_trials))
   lvar_errs = np.zeros((2, n_inducing.shape[0], n_trials))
@@ -182,13 +194,14 @@ for k in range(len(datasets)):
         train_cputs[j, i, t] = time.time()-t0
         #predict
         t0 = time.time()
-        mu_pred, sig_pred = algs[j].predict_f(Xt, cov_type='diag')
-        sig_pred = np.sqrt(sig_pred)
+        mu_pred, var_pred = algs[j].predict_f(Xt, cov_type='full')
+        sig_pred = np.sqrt(np.diag(var_pred))
         pred_cputs[j, i, t] = time.time() - t0
         #evaluate
         pred_errs[j, i, t] = np.sqrt(((mu_pred - Yt)**2).mean())
         post_mean_errs[j, i, t] = np.sqrt(((mu_pred_full-mu_pred)**2).mean())
         post_sig_errs[j, i, t] = np.sqrt(((sig_pred_full-sig_pred)**2).mean())
+        kl_divergences[j,i,t] = kl_gaussian(mu_pred_full, var_pred_full, mu_pred, var_pred)
         if j >= len(algs)-2:
           print('before post hyperopt: ')
           print(length_scales)
@@ -218,7 +231,7 @@ for k in range(len(datasets)):
           
   np.savez('results/'+dnm+'_'+str(d_seed)+'_results.npz', n_inducing=n_inducing, anms=anms,  
                                 pretrain_cputs=pretrain_cputs, train_cputs=train_cputs, pred_cputs=pred_cputs, 
-                                pred_errs=pred_errs, post_mean_errs=post_mean_errs, post_sig_errs=post_sig_errs,    
+                                pred_errs=pred_errs, post_mean_errs=post_mean_errs, post_sig_errs=post_sig_errs, kl_divergences=kl_divergences,    
                                 lsc_errs=lsc_errs, kvar_errs=kvar_errs, lvar_errs=lvar_errs)
 
 
