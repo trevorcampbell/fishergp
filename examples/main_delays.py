@@ -1,5 +1,7 @@
 import autograd.numpy as np
-from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP,  InducingGP, VariationalGP, expkern, optimize_hyperparameters
+from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP,  FisherGP, VariationalGP
+from fishergp.utils import optimize_hyperparameters
+from fishergp.kernels import GaussianKernel
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 
@@ -7,14 +9,22 @@ import GPy
 
 #load data
 print('loading data')
-data = np.load('delays.npy')
+data = np.load('datasets/delays.npy')
 #shuffle order
 print('shuffling data')
 np.random.shuffle(data)
 
+
 print('extracting training/test sets')
 N_train = 10000
 N_test = 10000
+
+
+data = data[:1000, :]
+N_train = 800
+N_test = 200
+
+
 #extract train, test sets
 X = data[:-N_test, :-1]
 Y = data[:-N_test, -1][:, np.newaxis]
@@ -38,6 +48,11 @@ Xt = Xt.dot(V)/np.sqrt(u)
 print('getting training subsample for nystrom/SR/subsample and inducing initialization')
 #select subsample idcs
 N_subsample = 1000
+
+
+N_subsample = 20
+
+
 N = X.shape[0]
 idcs = np.arange(N)
 np.random.shuffle(idcs)
@@ -52,7 +67,8 @@ batch_size=500
 likelihood_variance = 296.16
 kernel_variance = 17.66
 length_scales = np.array([0.7224, 11.17, 0.8665, 3.69081, 5.23420, 13.162661, 1.84575, 0.6019])
-kern = lambda X, Y=None, diag=False : expkern(X, Y, gamma=length_scales, sigma=kernel_variance, diag=diag)
+kern = GaussianKernel(length_scales, kernel_variance)
+gpykern = GPy.kern.RBF(input_dim=X.shape[1], lengthscale=length_scales, ARD=True, variance=kernel_variance)
 
 print('Naive mean error')
 mu_mean = Y.mean()
@@ -67,9 +83,9 @@ mu_s = mu_s.flatten()
 print('Normalized Error: ' + str(np.sqrt( (( mu_s - Yt)**2).sum())/Ytnorm))
 print('RMS Error: ' + str(np.sqrt( (( mu_s - Yt)**2).mean())))
 
-gp = VariationalGP(X, Y, length_scales, kernel_variance, likelihood_variance)
+gp = VariationalGP(X, Y, gpykern, likelihood_variance)
 print('Training sparse variational GP')
-gp.train(X[idcs, :])
+gp.train(idcs)
 mu_svgp, sig_svgp = gp.predict_y(Xt, cov_type='diag')
 mu_svgp = mu_svgp.flatten()
 print(np.sqrt(((mu_svgp - Yt)**2).sum())/Ytnorm)
@@ -94,20 +110,13 @@ print('Normalized Error: ' + str(np.sqrt( (( mu_sr - Yt)**2).sum())/Ytnorm))
 print('RMS Error: ' + str(np.sqrt( (( mu_sr - Yt)**2).mean())))
 
 
-igp = InducingGP(X, Y, kern, likelihood_variance)
+igp = FisherGP(X, Y, kern, likelihood_variance)
 print('Training inducing GP')
+igp.pretrain(subsample_idcs=idcs)
 igp.train(subsample_idcs=idcs, ridge=ridge)
 mu_ind, sig_ind = igp.predict_y(Xt, cov_type='diag')
 mu_ind = mu_ind.flatten()
 print(np.sqrt(((mu_ind - Yt)**2).sum())/Ytnorm)
-
-#cgp = CoresetGP(X, Y, kern, likelihood_variance)
-#print('Training coreset GP')
-#cgp.train(idcs, N_subsample, preconditioned=False, ridge=ridge)
-#mu_cst, sig_cst = cgp.predict_y(Xt, cov_type='diag')
-#mu_cst = mu_cst.flatten()
-#print np.sqrt(((mu_cst - Yt)**2).sum())/Ytnorm
-
 
 
 

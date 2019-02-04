@@ -1,11 +1,14 @@
 import numpy as np
 from gen_data import gen_synthetic, gen_linear, gen_from_file, standardize
-from gpcoreset import SubsampleGP, SubsetRegressorsGP, NystromGP, InducingGP, VariationalGP, Linear, optimize_hyperparameters, optimize_hyperparameters_post
+from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP, FisherGP, VariationalGP, Linear
+from fishergp.utils import optimize_hyperparameters
+from fishergp.kernels import GaussianKernel
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 
 import time
 import os
+import GPy
 
 #GPy.kern.RBF(input_dim=X.shape[1], lengthscale=self.k.gamma, ARD=True, variance=self.k.sigma)
 
@@ -47,8 +50,6 @@ n_pretrain = [100]
 datasets = [lambda s : gen_synthetic(1000, 1000, s)]
 
 
-
-
             
 
 n_trials = 10
@@ -74,24 +75,35 @@ for k in range(len(datasets)):
     krnprms = np.load(krnprm_fn)
     likelihood_variance = krnprms[0]
     kernel_variance = krnprms[1]
-    sq_length_scales = krnprms[2:]
+    length_scales = krnprms[2:]
   else:
     print('No saved parameters found. Optimizing...')
-    sq_length_scales, kernel_variance, likelihood_variance = optimize_hyperparameters(X, Y, n_inducing_hyperopt)
-    np.save(krnprm_fn, np.hstack((likelihood_variance, kernel_variance, sq_length_scales)))
+    kern, like  = optimize_hyperparameters(X, Y, n_inducing_hyperopt,
+                                      		GPy.kern.RBF(input_dim=X.shape[1], ARD=True), 
+                                                GPy.likelihoods.Gaussian()
+                                                )
+    length_scales = kern.lengthscale
+    kernel_variance = kern.variance
+    likelihood_variance = like.variance
+    np.save(krnprm_fn, np.hstack((likelihood_variance, kernel_variance, length_scales)))
 
-  print 'Lvar: ' + str(likelihood_variance)
-  print 'Kvar: ' + str(kernel_variance)
-  print 'lengths: ' + str(sq_length_scales)
+  print('Lvar: ' + str(likelihood_variance))
+  print('Kvar: ' + str(kernel_variance))
+  print('lengths: ' + str(length_scales))
+
+  kern = GaussianKernel(length_scales, kernel_variance)
+  gpykern = GPy.kern.RBF(input_dim=X.shape[1], lengthscale=length_scales, ARD=True, variance=kernel_variance)
+
+
 
   #create the model objects
   print('Creating models')
-  gp = SubsampleGP(X, Y, sq_length_scales, kernel_variance, likelihood_variance)
+  gp = SubsampleGP(X, Y, kern, likelihood_variance)
   lin = Linear(X, Y)
-  sgp = SubsampleGP(X, Y, sq_length_scales, kernel_variance, likelihood_variance)
-  srgp = SubsetRegressorsGP(X, Y, sq_length_scales, kernel_variance, likelihood_variance)
-  vgp = VariationalGP(X, Y, sq_length_scales, kernel_variance, likelihood_variance)
-  igp = InducingGP(X, Y, sq_length_scales, kernel_variance, likelihood_variance)
+  sgp = SubsampleGP(X, Y, kern, likelihood_variance)
+  srgp = SubsetRegressorsGP(X, Y, kern, likelihood_variance)
+  vgp = VariationalGP(X, Y, gpykern, likelihood_variance)
+  igp = FisherGP(X, Y, kern, likelihood_variance)
 
   #store algs in a list
   anms = ['linear', 'subsample', 'subset_regressors', 'variational_inducing', 'fisher_inducing']
@@ -167,16 +179,29 @@ for k in range(len(datasets)):
         post_mean_errs[j, i, t] = np.sqrt(((mu_pred_full-mu_pred)**2).mean())
         post_sig_errs[j, i, t] = np.sqrt(((sig_pred_full-sig_pred)**2).mean())
         if j >= len(algs)-2:
-          print 'before post hyperopt: '
-          print sq_length_scales, kernel_variance, likelihood_variance
-          lsc, kvar, lvar = optimize_hyperparameters_post(X, Y, algs[j].X_ind, sq_length_scales, kernel_variance, likelihood_variance)
-          print 'after post hyperopt: '
-          print lsc, kvar, lvar
-          print 'reldiffs: '
-          print np.sqrt( ((lsc - sq_length_scales)**2).sum())/np.sqrt((sq_length_scales**2).sum())
-          print np.fabs(kvar-kernel_variance)/np.fabs(kernel_variance)
-          print np.fabs(lvar - likelihood_variance)/np.fabs(likelihood_variance)
-          lsc_errs[j-(len(algs)-2), i, t] =  np.sqrt( ((lsc - sq_length_scales)**2).sum())/np.sqrt((sq_length_scales**2).sum())
+          print('before post hyperopt: ')
+          print(length_scales)
+          print(kernel_variance)
+          print(likelihood_variance)
+
+          kern, like  = optimize_hyperparameters(X, Y, algs[j].X_ind,
+                                      		GPy.kern.RBF(input_dim=X.shape[1], lengthscale=length_scales, variance=kernel_variance, ARD=True), 
+                                                GPy.likelihoods.Gaussian(variance=likelihood_variance)
+                                                )
+          lsc = kern.lengthscale
+          kvar = kern.variance
+          lvar = like.variance
+          #lsc, kvar, lvar = optimize_hyperparameters_post(X, Y, algs[j].X_ind, length_scales, kernel_variance, likelihood_variance)
+
+          print('after post hyperopt: ')
+          print(lsc)
+          print(kvar)
+          print(lvar)
+          print('reldiffs: ')
+          print(np.sqrt( ((lsc - length_scales)**2).sum())/np.sqrt((length_scales**2).sum()))
+          print(np.fabs(kvar-kernel_variance)/np.fabs(kernel_variance))
+          print(np.fabs(lvar - likelihood_variance)/np.fabs(likelihood_variance))
+          lsc_errs[j-(len(algs)-2), i, t] =  np.sqrt( ((lsc - length_scales)**2).sum())/np.sqrt((length_scales**2).sum())
           kvar_errs[j-(len(algs)-2), i, t] =  np.fabs(kvar-kernel_variance)/np.fabs(kernel_variance)
           lvar_errs[j-(len(algs)-2), i, t] =  np.fabs(lvar - likelihood_variance)/np.fabs(likelihood_variance)
           

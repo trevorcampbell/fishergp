@@ -1,6 +1,7 @@
 import sys
 import time
 import GPy
+import autograd.numpy as np
 
 class ProgressBar(object):
 
@@ -45,19 +46,22 @@ class ProgressBar(object):
      sys.stdout.write('\n')
      sys.stdout.flush()
 
-def optimize_hyperparameters(X, Y, num_inducing):
-  m = GPy.core.SparseGP(X, Y, X[np.random.randint(X.shape[0], size=num_inducing), :].copy(),
-                        GPy.kern.RBF(input_dim=X.shape[1], ARD=True),
-                        GPy.likelihoods.Gaussian())
-  m.optimize('bfgs', max_iters=10000, messages=True)
-  return np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
+def optimize_hyperparameters(X, Y, inducing, kern, likelihood):
+  if type(inducing) is np.ndarray and len(inducing.shape) == 2:
+    m = GPy.core.SparseGP(X, Y, inducing,
+                        kern, #GPy.kern.RBF(input_dim=X.shape[1], lengthscale=sq_length_scales.copy(), variance=kernel_var, ARD=True),
+                        likelihood) #GPy.likelihoods.Gaussian(variance=likelihood_var))
+  else:
+    m = GPy.core.SparseGP(X, Y, X[np.random.randint(X.shape[0], size=inducing), :].copy(),
+                          kern, #GPy.kern.RBF(input_dim=X.shape[1], ARD=True),
+                          likelihood) #GPy.likelihoods.Gaussian())
+    m.optimize('bfgs', max_iters=10000, messages=True)
+  return m.kern, m.likelihood #np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
 
-def optimize_hyperparameters_post(X, Y, Z, sq_length_scales, kernel_var, likelihood_var):
-  m = GPy.core.SparseGP(X, Y, Z,
-                        GPy.kern.RBF(input_dim=X.shape[1], lengthscale=sq_length_scales.copy(), variance=kernel_var, ARD=True),
-                        GPy.likelihoods.Gaussian(variance=likelihood_var))
-  m.inducing_inputs.fix()
-  m.optimize('bfgs', max_iters=10000, messages=True)
-  return np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
+#def optimize_hyperparameters_post(X, Y, Z, kern, likelihood): # sq_length_scales, kernel_var, likelihood_var):
+#  
+#  m.inducing_inputs.fix()
+#  m.optimize('bfgs', max_iters=10000, messages=True)
+#  return m.kernel, m.likelihood #np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
 
 

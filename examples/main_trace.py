@@ -1,7 +1,7 @@
 import numpy as np
 import cPickle as cpk
 from gen_data import gen_synthetic, gen_linear, gen_from_file, standardize
-from gpcoreset import SubsampleGP, SubsetRegressorsGP, NystromGP, InducingGP, VariationalGP, Linear, optimize_hyperparameters
+from gpcoreset import SubsampleGP, SubsetRegressorsGP, NystromGP, FisherGP, VariationalGP, Linear, optimize_hyperparameters
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 
@@ -66,7 +66,7 @@ for k in range(len(datasets)):
   #create the model objects
   print('Creating models')
   gp = SubsampleGP(X, Y, sq_length_scales, kernel_variance, likelihood_variance)
-  igp = InducingGP(X, Y, sq_length_scales, kernel_variance, likelihood_variance)
+  igp = FisherGP(X, Y, sq_length_scales, kernel_variance, likelihood_variance)
 
   print('Training full GP')
   full_results_fn = 'results/'+dnm+'_'+str(d_seed)+'_full_results.npz'
