@@ -1,7 +1,7 @@
 import numpy as np
 import cPickle as cpk
 from gen_data import gen_synthetic, gen_linear, gen_from_file, standardize
-from gpcoreset import SubsampleGP, SubsetRegressorsGP, NystromGP, InducingGP, VariationalGP, Linear, optimize_hyperparameters, optimize_hyperparameters_post
+from gpcoreset import SubsampleGP, SubsetRegressorsGP, NystromGP, InducingGP, VariationalGP, Linear, optimize_hyperparameters
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 

@@ -6,4 +6,5 @@ setup(
     packages=['fishergp',],
     license='MIT License',
     long_description=open('README.md').read(),
+    install_requires = ['numpy', 'scipy', 'GPy', 'autograd'],
 )

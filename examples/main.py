@@ -7,6 +7,9 @@ import bokeh.palettes
 import time
 import os
 
+#GPy.kern.RBF(input_dim=X.shape[1], lengthscale=self.k.gamma, ARD=True, variance=self.k.sigma)
+
+
 ##create dataset generators
 d_seed = 1
 #dnms = ['synthetic', 'delays10k', 'abalone', 'kin8nm', 'airfoil']

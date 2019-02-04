@@ -1,7 +1,5 @@
 import numpy as np
 
-
-
 def gen_linear(N_train, N_test, seed):
   np.random.seed(seed)
   print('generating synthetic data')
