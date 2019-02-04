@@ -12,8 +12,8 @@ import GPy
 
 def kl_gaussian(mu1, Sig1, mu2, Sig2, ridge=1e-9):
   r = ridge*np.eye(mu1.shape[0])
-  print(np.linalg.eigvalsh(Sig1+r).min())
-  print(np.linalg.eigvalsh(Sig2+r).min())
+  #print(np.linalg.eigvalsh(Sig1+r).min())
+  #print(np.linalg.eigvalsh(Sig2+r).min())
   k1 = np.trace(np.linalg.solve(Sig2+r, Sig1+r))
   k2 = (mu1-mu2).T.dot( np.linalg.solve(Sig2+r, mu1-mu2   ))
   k3 = np.linalg.slogdet(Sig2+r)[1] - np.linalg.slogdet(Sig1+r)[1]

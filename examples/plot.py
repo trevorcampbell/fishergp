@@ -108,7 +108,7 @@ for k in range(len(dnms)):
     pred_cput_full = res['pred_cput_full']
     train_cput_full = res['train_cput_full']
 
-    f_kl_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Test Prediction Error', x_axis_type='log', x_axis_label='# Inducing Pts')
+    f_kl_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='Posterior KL Divergence', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pe_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Test Prediction Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pme_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pse_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error', x_axis_type='log', x_axis_label='# Inducing Pts')
@@ -157,7 +157,7 @@ for k in range(len(dnms)):
         f_pe_vs_ni.line(eff_num_inducing, pe_mean, legend=anm_legend, line_width=7, line_color=colors[j])
         #f_pe_vs_cput.line(cput_mean, pe_mean, legend=anm_legend, line_width=7, line_color=colors[j])
 
-        kl_mean = kl_divergences[j, :, :].mean(axis=1)
+        kl_mean = kl[j, :, :].mean(axis=1)
         pme_mean = post_mean_errs[j, :, :].mean(axis=1)
         pme_std = post_mean_errs[j, :, :].std(axis=1)
         pme_best = post_mean_errs[j, :, :].min(axis=1)
