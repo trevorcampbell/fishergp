@@ -30,6 +30,7 @@ class SubsampleGP(GP):
 
   def train(self, subsample_idcs=None, ridge=1e-9):
     self.idcs = np.sort(subsample_idcs)
+    self.X_ind = self.X[self.idcs, :]
 
     Kxx = self.k(self.X[self.idcs, :])
     self.alpha = np.linalg.solve(Kxx+self.lvar*np.eye(self.idcs.shape[0]), self.Y[self.idcs, :])
@@ -49,6 +50,7 @@ class SubsetRegressorsGP(GP):
 
   def train(self, subsample_idcs=None, ridge=1e-9, max_storage=1e8):
     self.idcs = np.sort(subsample_idcs)
+    self.X_ind = self.X[self.idcs, :]
 
     self.chunk_size  = int(max_storage / float(self.idcs.shape[0]))
     if self.chunk_size == 0:
@@ -91,6 +93,7 @@ class NystromGP(GP):
 
   def train(self, subsample_idcs=None, ridge=1e-9, max_storage=1e8):
     self.idcs = np.sort(subsample_idcs)
+    self.X_ind = self.X[self.idcs, :]
 
     self.chunk_size  = int(max_storage / float(self.idcs.shape[0]))
     if self.chunk_size == 0:

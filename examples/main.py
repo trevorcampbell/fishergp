@@ -6,6 +6,7 @@ from fishergp.kernels import GaussianKernel
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 
+import cPickle as cpk
 import time
 import os
 import GPy
@@ -165,6 +166,11 @@ for k in range(len(datasets)):
   lsc_errs = np.zeros((2, n_inducing.shape[0], n_trials))
   kvar_errs = np.zeros((2, n_inducing.shape[0], n_trials))
   lvar_errs = np.zeros((2, n_inducing.shape[0], n_trials))
+  inducing_pts = []
+  for i in range(len(algs)):
+    inducing_pts.append([])
+    for j in range(n_inducing.shape[0]):
+      inducing_pts[i].append([])
 
   #run algs
   print('Running inference')
@@ -192,6 +198,7 @@ for k in range(len(datasets)):
         t0 = time.time()
         algs[j].train(subsample_idcs)
         train_cputs[j, i, t] = time.time()-t0
+        inducing_pts[j][i].append(algs[j].X_ind)
         #predict
         t0 = time.time()
         mu_pred, var_pred = algs[j].predict_f(Xt, cov_type='full')
@@ -233,5 +240,7 @@ for k in range(len(datasets)):
                                 pretrain_cputs=pretrain_cputs, train_cputs=train_cputs, pred_cputs=pred_cputs, 
                                 pred_errs=pred_errs, post_mean_errs=post_mean_errs, post_sig_errs=post_sig_errs, kl_divergences=kl_divergences,    
                                 lsc_errs=lsc_errs, kvar_errs=kvar_errs, lvar_errs=lvar_errs)
-
+  f = open('results/'+dnm+'_'+str(d_seed)+'_inducing_pts.cpk', wb)
+  cpk.dump(inducing_pts, f)
+  f.close()
 
