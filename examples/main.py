@@ -6,7 +6,7 @@ from fishergp.kernels import GaussianKernel
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes 
-import cPickle as cpk
+import pickle as pk
 import time
 import os
 import GPy
@@ -240,7 +240,7 @@ for k in range(len(datasets)):
                                 pretrain_cputs=pretrain_cputs, train_cputs=train_cputs, pred_cputs=pred_cputs, 
                                 pred_errs=pred_errs, post_mean_errs=post_mean_errs, post_sig_errs=post_sig_errs, kl_divergences=kl_divergences,    
                                 lsc_errs=lsc_errs, kvar_errs=kvar_errs, lvar_errs=lvar_errs)
-  f = open('results/'+dnm+'_'+str(d_seed)+'_inducing_pts.cpk', wb)
-  cpk.dump(inducing_pts, f)
+  f = open('results/'+dnm+'_'+str(d_seed)+'_inducing_pts.pk', 'wb')
+  pk.dump(inducing_pts, f)
   f.close()
 
