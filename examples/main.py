@@ -49,14 +49,22 @@ d_seed = 1
 #datasets = [lambda s : gen_from_file('airfoil', 1103, 400, s)]
 
 
-dnms = ['wine', 'ccpp', 'kin8nm'] #, 'sarcos']
-n_pretrain = [300, 700, 600] #, 4000]
-datasets = [lambda s : gen_from_file('wine', 3898, 1000, s),
-            lambda s : gen_from_file('ccpp', 7568, 2000, s),
-            lambda s : gen_from_file('kin8nm', 6192, 2000, s)]
-            #lambda s : gen_from_file('sarcos', 30484, 14000, s)]
+#dnms = ['wine', 'ccpp', 'kin8nm'] #, 'sarcos']
+#n_pretrain = [300, 700, 600] #, 4000]
+#datasets = [lambda s : gen_from_file('wine', 3898, 1000, s),
+#            lambda s : gen_from_file('ccpp', 7568, 2000, s),
+#            lambda s : gen_from_file('kin8nm', 6192, 2000, s)]
+#            #lambda s : gen_from_file('sarcos', 30484, 14000, s)]
 
 
+dnms = ['synthetic', 'delays10k', 'abalone', 'airfoil', 'wine', 'ccpp']
+n_pretrain = [100, 800, 300, 100, 300, 700]
+datasets = [lambda s : gen_synthetic(1000, 1000, s),
+            lambda s : gen_from_file('delays10k', 8000, 2000, s),
+            lambda s : gen_from_file('abalone', 3177, 1000, s),
+            lambda s : gen_from_file('airfoil', 1103, 400, s),
+            lambda s : gen_from_file('wine', 3898, 1000, s),
+            lambda s : gen_from_file('ccpp', 7568, 2000, s)]
 
 
 
@@ -72,9 +80,8 @@ n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))
 #n_inducing = np.unique(np.logspace(0, 2, 5, dtype=np.int))
 n_inducing_hyperopt = 200
 
-
-n_trials = 10
-n_inducing = np.array([2, 5, 10], dtype=np.int64)
+#n_trials = 10
+#n_inducing = np.array([2, 5, 10], dtype=np.int64)
 
 
 
