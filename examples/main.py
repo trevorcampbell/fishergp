@@ -180,8 +180,9 @@ for k in range(len(datasets)):
   #run algs
   print('Running inference')
   for i in range(n_inducing.shape[0]):
-    print('# Inducing pts: ' +str(n_inducing[i]))
     for t in range(n_trials):
+      print('Dataset: ' + dnm + ' ('+str(k+1)+'/'+str(len(datasets))+')')
+      print('# Inducing pts: ' +str(n_inducing[i]) + ' (' + str(i+1)+'/'+str(n_inducing.shape[0])+')')
       print('Trial ' + str(t+1)+'/'+str(n_trials))
 
       #get index subsets for training
