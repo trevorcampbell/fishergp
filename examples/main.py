@@ -76,7 +76,7 @@ datasets = [lambda s : gen_synthetic(1000, 1000, s)]
             
 
 n_trials = 10
-n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))
+n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))[1:]
 #n_inducing = np.unique(np.logspace(0, 2, 5, dtype=np.int))
 n_inducing_hyperopt = 200
 
@@ -122,8 +122,6 @@ for k in range(len(datasets)):
 
   kern = GaussianKernel(length_scales, kernel_variance)
   gpykern = GPy.kern.RBF(input_dim=X.shape[1], lengthscale=length_scales, ARD=True, variance=kernel_variance)
-
-
 
   #create the model objects
   print('Creating models')

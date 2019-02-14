@@ -55,7 +55,8 @@ def optimize_hyperparameters(X, Y, inducing, kern, likelihood):
     m = GPy.core.SparseGP(X, Y, X[np.random.randint(X.shape[0], size=inducing), :].copy(),
                           kern, #GPy.kern.RBF(input_dim=X.shape[1], ARD=True),
                           likelihood) #GPy.likelihoods.Gaussian())
-    m.optimize('bfgs', max_iters=10000, messages=True)
+  m.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
+  # adam, lbfgsb, 
   return m.kern, m.likelihood #np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
 
 #def optimize_hyperparameters_post(X, Y, Z, kern, likelihood): # sq_length_scales, kernel_var, likelihood_var):

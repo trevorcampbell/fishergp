@@ -18,7 +18,7 @@ class GP(object):
   def predict_y(self, Xt, cov_type='full'):
     mu, sig = self.predict_f(Xt, cov_type)
     if cov_type == 'full':
-      sig += np.diag(lvar*np.ones(sig.shape[0]))
+      sig += np.diag(self.lvar*np.ones(sig.shape[0]))
     else:
       sig += self.lvar
     return mu, sig
@@ -189,7 +189,7 @@ class VariationalGP(GP):
                            GPy.likelihoods.Gaussian(variance=self.lvar))
     self.model.kern.fix()
     self.model.likelihood.variance.fix()
-    self.model.optimize('bfgs', max_iters=10000, messages=True)
+    self.model.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
     self.X_ind = np.asarray(self.model.inducing_inputs)
 
   def predict_f(self, Xt, cov_type='full'):
@@ -241,7 +241,7 @@ class FisherGP(GP):
     self.X_ind = minimize(fun=lambda x : self._objective(x, 0, ridge),
                           x0=Z.flatten(),
                           jac=grad(lambda x : self._objective(x, 0, ridge)),
-                          method='L-BFGS-B', options ={'disp' : True},
+                          method='TNC', options ={'disp' : True},
                           callback = __cbk
                           ).x.reshape(self.Zshape)
     #after optimization is done, compute alpha / C for testing
