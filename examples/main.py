@@ -11,6 +11,7 @@ import time
 import os
 import GPy
 
+
 def kl_gaussian(mu1, Sig1, mu2, Sig2, ridge=1e-9):
   r = ridge*np.eye(mu1.shape[0])
   #print(np.linalg.eigvalsh(Sig1+r).min())
@@ -26,15 +27,6 @@ def kl_gaussian(mu1, Sig1, mu2, Sig2, ridge=1e-9):
 
 ##create dataset generators
 d_seed = 1
-#dnms = ['synthetic', 'delays10k', 'abalone', 'kin8nm', 'airfoil']
-#n_pretrain = [100, 100, 100, 100, ]
-#datasets = [lambda s : gen_synthetic(1000, 1000, s),
-#            lambda s : gen_from_file('delays10k', 1000, 1000, s),
-#            lambda s : gen_from_file('abalone', 1000, 1000, s),
-#            lambda s : gen_from_file('kin8nm', 1000, 1000, s),
-#            lambda s : gen_from_file('airfoil', 1000, 1000, s)]
-
-
 #dnms = ['synthetic', 'delays10k', 'abalone', 'kin8nm', 'airfoil']
 #n_pretrain = [100, 800, 300, 600, 100]
 #datasets = [lambda s : gen_synthetic(1000, 1000, s),
@@ -57,21 +49,29 @@ d_seed = 1
 #            #lambda s : gen_from_file('sarcos', 30484, 14000, s)]
 
 
-dnms = ['synthetic', 'delays10k', 'abalone', 'airfoil', 'wine', 'ccpp']
-n_pretrain = [100, 800, 300, 100, 300, 700]
+
+
+#dnms = ['delays10k', 'abalone', 'airfoil', 'wine', 'ccpp']
+#n_pretrain = [800, 300, 100, 300, 700]
+#datasets = [lambda s : gen_from_file('delays10k', 8000, 2000, s),
+#            lambda s : gen_from_file('abalone', 3177, 1000, s),
+#            lambda s : gen_from_file('airfoil', 1103, 400, s),
+#            lambda s : gen_from_file('wine', 3898, 1000, s),
+#            lambda s : gen_from_file('ccpp', 7568, 2000, s)]
+#
+#
+#dnms = ['synthetic']
+#n_pretrain = [100]
+#datasets = [lambda s : gen_synthetic(1000, 1000, s)]
+
+dnms = ['synthetic', 'abalone', 'airfoil', 'wine', 'ccpp', 'delays10k']
+n_pretrain = [100, 300, 100, 300, 700, 800]
 datasets = [lambda s : gen_synthetic(1000, 1000, s),
-            lambda s : gen_from_file('delays10k', 8000, 2000, s),
             lambda s : gen_from_file('abalone', 3177, 1000, s),
             lambda s : gen_from_file('airfoil', 1103, 400, s),
             lambda s : gen_from_file('wine', 3898, 1000, s),
-            lambda s : gen_from_file('ccpp', 7568, 2000, s)]
-
-
-
-dnms = ['synthetic']
-n_pretrain = [100]
-datasets = [lambda s : gen_synthetic(1000, 1000, s)]
-
+            lambda s : gen_from_file('ccpp', 7568, 2000, s),
+            lambda s : gen_from_file('delays10k', 8000, 2000, s)]
 
             
 
@@ -82,8 +82,6 @@ n_inducing_hyperopt = 200
 
 #n_trials = 10
 #n_inducing = np.array([2, 5, 10], dtype=np.int64)
-
-
 
 
 #run trials, loading each dataset

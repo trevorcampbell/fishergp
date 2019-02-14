@@ -2,6 +2,7 @@ import sys
 import time
 import GPy
 import autograd.numpy as np
+import pdb
 
 class ProgressBar(object):
 
@@ -55,7 +56,11 @@ def optimize_hyperparameters(X, Y, inducing, kern, likelihood):
     m = GPy.core.SparseGP(X, Y, X[np.random.randint(X.shape[0], size=inducing), :].copy(),
                           kern, #GPy.kern.RBF(input_dim=X.shape[1], ARD=True),
                           likelihood) #GPy.likelihoods.Gaussian())
-  m.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
+  m[''].constrain_bounded(1e-9, 1e9)
+  m.likelihood.variance.constrain_bounded(1e-9, 10*np.var(Y))
+  m.kern.variance.constrain_bounded(1e-9, 10*np.var(Y))
+  #m.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
+  m.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
   # adam, lbfgsb, 
   return m.kern, m.likelihood #np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
 
