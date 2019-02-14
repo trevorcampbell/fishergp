@@ -241,8 +241,8 @@ class FisherGP(GP):
     self.X_ind = minimize(fun=lambda x : self._objective(x, 0, ridge),
                           x0=Z.flatten(),
                           jac=grad(lambda x : self._objective(x, 0, ridge)),
-                          method='TNC', options ={'disp' : True},
-                          callback = __cbk
+                          method='TNC', options ={'disp' : True, 'maxiter':10000},
+                          callback = __cbk,
                           ).x.reshape(self.Zshape)
     #after optimization is done, compute alpha / C for testing
     self.posttrain()
