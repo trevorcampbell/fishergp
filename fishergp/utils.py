@@ -60,8 +60,8 @@ def optimize_hyperparameters(X, Y, inducing, kern, likelihood):
     m[''].constrain_bounded(1e-6, 1e6)
     m.likelihood.variance.constrain_bounded(1e-6, 10*np.var(Y))
     m.kern.variance.constrain_bounded(1e-6, 10*np.var(Y))
-    m.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
-    #m.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
+    #m.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
+    m.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
     # adam, lbfgsb, 
   except:
     pass #if constraining/optimization fails (GPy/paramz sometimes fails when constraining variables...) just use whatever the current solution is

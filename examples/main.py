@@ -219,7 +219,7 @@ for k in range(len(datasets)):
         post_mean_errs[j, i, t] = np.sqrt(((mu_pred_full-mu_pred)**2).mean())
         post_sig_errs[j, i, t] = np.sqrt(((sig_pred_full-sig_pred)**2).mean())
         kl_divergences[j,i,t] = kl_gaussian(mu_pred_full, var_pred_full, mu_pred, var_pred)
-        if anms[j] == 'variational_inducing' or anms[j] == 'fisher_inducing' and check_hyper_stability:
+        if (anms[j] == 'variational_inducing' or anms[j] == 'fisher_inducing') and check_hyper_stability:
           print('before post hyperopt: ')
           print(length_scales)
           print(kernel_variance)

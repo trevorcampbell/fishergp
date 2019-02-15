@@ -191,8 +191,8 @@ class VariationalGP(GP):
       self.model.kern.fix()
       self.model.likelihood.variance.fix()
       self.model.inducing_inputs.constrain_bounded(self.X.min(), self.X.max())
-      #self.model.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
-      self.model.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
+      self.model.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
+      #self.model.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
     except:
       self.X_ind = self.X[self.idcs, :].copy() #if optimization fails, just revert to initilaization
     self.X_ind = np.asarray(self.model.inducing_inputs)
@@ -248,8 +248,8 @@ class FisherGP(GP):
                         x0=Z.flatten(),
                         jac=grad(lambda x : self._objective(x, 0, ridge)),
                         bounds=Bounds(self.X.min(), self.X.max()),
-                        #method='L-BFGS-B', options ={'disp' : True, 'maxiter':10000},
-                        method='TNC', options ={'disp' : True, 'maxiter':10000},
+                        method='L-BFGS-B', options ={'disp' : True, 'maxiter':10000},
+                        #method='TNC', options ={'disp' : True, 'maxiter':10000},
                         callback = __cbk,
                         ).x.reshape(self.Zshape)
     except:
