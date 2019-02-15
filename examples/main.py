@@ -73,6 +73,7 @@ datasets = [lambda s : gen_synthetic(1000, 1000, s),
             lambda s : gen_from_file('ccpp', 7568, 2000, s),
             lambda s : gen_from_file('delays10k', 8000, 2000, s)]
 
+
             
 
 n_trials = 10
@@ -93,6 +94,7 @@ for k in range(len(datasets)):
   print('Loading data...')
   X, Y, Xt, Yt = dst(d_seed)
   print('Standardizing...')
+  #note that this function modifies in-place; the output isn't used
   Xmu, XZ, Ymu, YZ = standardize(X, Y, Xt, Yt)
 
   #load/optimize kernel parameters

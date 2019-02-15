@@ -187,11 +187,14 @@ class VariationalGP(GP):
     self.model = GPy.core.SparseGP(self.X, self.Y, self.X[self.idcs, :].copy(),
                            self.k,
                            GPy.likelihoods.Gaussian(variance=self.lvar))
-    self.model.kern.fix()
-    self.model.likelihood.variance.fix()
-    self.model.inducing_inputs.constrain_bounded(self.X.min(), self.X.max())
-    self.model.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
-    #self.model.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
+    try:
+      self.model.kern.fix()
+      self.model.likelihood.variance.fix()
+      self.model.inducing_inputs.constrain_bounded(self.X.min(), self.X.max())
+      #self.model.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
+      self.model.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
+    except:
+      self.X_ind = self.X[self.idcs, :].copy() #if optimization fails, just revert to initilaization
     self.X_ind = np.asarray(self.model.inducing_inputs)
 
   def predict_f(self, Xt, cov_type='full'):
@@ -240,14 +243,17 @@ class FisherGP(GP):
       __cbk = lambda x : self._cbk(x, Xt, mu_full, sig_full, ridge)
     else:
       __cbk = None
-    self.X_ind = minimize(fun=lambda x : self._objective(x, 0, ridge),
+    try:
+      self.X_ind = minimize(fun=lambda x : self._objective(x, 0, ridge),
                         x0=Z.flatten(),
                         jac=grad(lambda x : self._objective(x, 0, ridge)),
                         bounds=Bounds(self.X.min(), self.X.max()),
-                        method='L-BFGS-B', options ={'disp' : True, 'maxiter':10000},
-                        #method='TNC', options ={'disp' : True, 'maxiter':10000},
+                        #method='L-BFGS-B', options ={'disp' : True, 'maxiter':10000},
+                        method='TNC', options ={'disp' : True, 'maxiter':10000},
                         callback = __cbk,
                         ).x.reshape(self.Zshape)
+    except:
+      self.X_ind = Z.copy() #if optimization fails, just revert to initialization
     #after optimization is done, compute alpha / C for testing
     self.posttrain()
 

@@ -89,6 +89,7 @@ colors=['blue', 'red', 'green', 'orange', 'purple', 'cyan']
 for k in range(len(dnms)):
     res = np.load('results/'+dnms[k]+'_'+str(d_seed)+'_results.npz')
     anms=res['anms']
+    print(anms)
     n_inducing=res['n_inducing']
     pretrain_cputs=res['pretrain_cputs']
     train_cputs=res['train_cputs']
@@ -136,10 +137,13 @@ for k in range(len(dnms)):
         f_pe_vs_ni.line(n_inducing, pred_err_full*np.ones(n_inducing.shape[0]), line_width=7, line_color='black')
 
     for j in range(len(anms)):
-        if anms[j] == b'linear':
-            continue
+        #if anms[j] == 'linear':
+        #    continue
         pe_mean = pred_errs[j, :, :].mean(axis=1)
         pe_std = pred_errs[j, :, :].std(axis=1)
+
+        #if anms[j] == 'variational_inducing':
+        #  print(pe_mean)
 
         cput_mean = train_cputs[j, :, :].mean(axis=0)
         cput_std = train_cputs[j, :, :].std(axis=0)
@@ -149,7 +153,7 @@ for k in range(len(dnms)):
         else:
             anm_legend = None
 
-        if anms[j] == b'subsample':
+        if anms[j] == 'subsample':
             eff_num_inducing = n_inducing**1.5 / np.sqrt(dset_sizes[dnms[k]])
         else:
             eff_num_inducing = n_inducing

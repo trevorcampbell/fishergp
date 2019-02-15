@@ -56,18 +56,16 @@ def optimize_hyperparameters(X, Y, inducing, kern, likelihood):
     m = GPy.core.SparseGP(X, Y, X[np.random.randint(X.shape[0], size=inducing), :].copy(),
                           kern, #GPy.kern.RBF(input_dim=X.shape[1], ARD=True),
                           likelihood) #GPy.likelihoods.Gaussian())
-  m[''].constrain_bounded(1e-9, 1e9)
-  m.likelihood.variance.constrain_bounded(1e-9, 10*np.var(Y))
-  m.kern.variance.constrain_bounded(1e-9, 10*np.var(Y))
-  #m.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
-  m.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
-  # adam, lbfgsb, 
-  return m.kern, m.likelihood #np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
+  try:
+    m[''].constrain_bounded(1e-6, 1e6)
+    m.likelihood.variance.constrain_bounded(1e-6, 10*np.var(Y))
+    m.kern.variance.constrain_bounded(1e-6, 10*np.var(Y))
+    m.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
+    #m.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
+    # adam, lbfgsb, 
+  except:
+    pass #if constraining/optimization fails (GPy/paramz sometimes fails when constraining variables...) just use whatever the current solution is
 
-#def optimize_hyperparameters_post(X, Y, Z, kern, likelihood): # sq_length_scales, kernel_var, likelihood_var):
-#  
-#  m.inducing_inputs.fix()
-#  m.optimize('bfgs', max_iters=10000, messages=True)
-#  return m.kernel, m.likelihood #np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
+  return m.kern, m.likelihood #np.asarray(m.rbf.lengthscale), np.asscalar(m.rbf.variance), np.asscalar(m.likelihood.variance)
 
 
