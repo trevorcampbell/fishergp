@@ -37,7 +37,6 @@ n_trials = 20
 n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))[1:]
 #n_inducing = np.unique(np.logspace(0, 2, 5, dtype=np.int))
 n_inducing_hyperopt = 200
-n_inducing = np.array([50], dtype=np.int)
 
 #n_trials = 10
 #n_inducing = np.array([2, 5, 10], dtype=np.int64)
