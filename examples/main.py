@@ -31,20 +31,13 @@ datasets = [lambda s : gen_synthetic(1000, 1000, s),
             lambda s : gen_from_file('ccpp', 7568, 2000, s),
             lambda s : gen_from_file('delays10k', 8000, 2000, s)]
 
-dnms = ['synthetic', 'abalone', 'airfoil', 'ccpp', 'delays10k']
-n_pretrain = [100, 300, 100, 700, 800]
-datasets = [lambda s : gen_synthetic(1000, 1000, s),
-            lambda s : gen_from_file('abalone', 3177, 1000, s),
-            lambda s : gen_from_file('airfoil', 1103, 400, s),
-            lambda s : gen_from_file('ccpp', 7568, 2000, s),
-            lambda s : gen_from_file('delays10k', 8000, 2000, s)]
-
 
 
 n_trials = 20
 n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))[1:]
 #n_inducing = np.unique(np.logspace(0, 2, 5, dtype=np.int))
 n_inducing_hyperopt = 200
+n_inducing = np.array([50], dtype=np.int)
 
 #n_trials = 10
 #n_inducing = np.array([2, 5, 10], dtype=np.int64)

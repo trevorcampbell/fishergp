@@ -27,7 +27,7 @@ def gen_synthetic(N_train, N_test, seed):
   np.random.seed(seed)
   print('generating synthetic data')
   N=N_train+N_test
-  likelihood_var = 0.05
+  likelihood_var = 0.01
   X = np.random.rand(N,1)
   Y = np.sin(12*X) + 0.66*np.cos(25*X) + np.random.randn(N,1)*np.sqrt(likelihood_var) + 3
   Xt = X[-N_test:, :]

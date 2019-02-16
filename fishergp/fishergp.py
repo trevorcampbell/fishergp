@@ -301,6 +301,10 @@ class FisherGP(GP):
     Kxi = self.k(X_i)
     Kxi += ridge*np.fabs(Kxi).max()*np.eye(isz)
     Kxixsr = self.k(X_i, self.X[self.sridcs, :])
+    #
+    #print(np.linalg.cond(self.V))
+    #print(np.linalg.cond(Kxi))
+    #
     Khxi = np.dot(Kxixsr, np.linalg.solve(self.V, Kxixsr.T))
 
     Kxi_inv_muxi = np.linalg.solve(Kxi, np.dot(Kxixsr, self.pre_alpha))
@@ -328,6 +332,10 @@ class FisherGP(GP):
 
     B = np.linalg.solve(Kxi.T, Kxi_inv_KxxiTKxxi.T).T / self.lvar
     B = 0.5*(B+B.T) #enforce symmetry (lin solver doesn't guarantee)
+
+    #
+    #print(np.linalg.cond(np.eye(isz) + np.dot(B, Kxi)))
+    #
 
     Xi = np.linalg.solve(np.eye(isz) + np.dot(B, Kxi), B)
     Xi = 0.5*(Xi+Xi.T) #enforce symmetry (lin solver doesn't guarantee)
