@@ -47,7 +47,7 @@ class ProgressBar(object):
      sys.stdout.write('\n')
      sys.stdout.flush()
 
-def optimize_hyperparameters(X, Y, inducing, kern, likelihood):
+def optimize_hyperparameters(X, Y, inducing, kern, likelihood, messages=True):
   if type(inducing) is np.ndarray and len(inducing.shape) == 2:
     m = GPy.core.SparseGP(X, Y, inducing,
                         kern, #GPy.kern.RBF(input_dim=X.shape[1], lengthscale=sq_length_scales.copy(), variance=kernel_var, ARD=True),
@@ -61,7 +61,7 @@ def optimize_hyperparameters(X, Y, inducing, kern, likelihood):
     m.likelihood.variance.constrain_bounded(1e-6, 10*np.var(Y))
     m.kern.variance.constrain_bounded(1e-6, 10*np.var(Y))
     #m.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)
-    m.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
+    m.optimize('lbfgsb', max_iters=10000, messages=messages, ipython_notebook=False)
     # adam, lbfgsb, 
   except:
     pass #if constraining/optimization fails (GPy/paramz sometimes fails when constraining variables...) just use whatever the current solution is

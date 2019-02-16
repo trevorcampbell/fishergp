@@ -189,7 +189,7 @@ class VariationalGP(GP):
                            GPy.likelihoods.Gaussian(variance=self.lvar))
     try:
       self.model.kern.fix()
-      self.model.likelihood.variance.fix()
+      self.model.likelihood.fix()
       self.model.inducing_inputs.constrain_bounded(self.X.min(), self.X.max())
       self.model.optimize('lbfgsb', max_iters=10000, messages=True, ipython_notebook=False)
       #self.model.optimize('fmin_tnc', max_iters=10000, messages=True, ipython_notebook=False)

@@ -1,5 +1,5 @@
 import numpy as np
-from gen_data import gen_synthetic, gen_linear, gen_from_file, standardize
+from utils import kl_gaussian, gen_synthetic, gen_linear, gen_from_file, standardize
 from fishergp import SubsampleGP, SubsetRegressorsGP, NystromGP, FisherGP, VariationalGP, Linear
 from fishergp.utils import optimize_hyperparameters
 from fishergp.kernels import GaussianKernel
@@ -12,19 +12,6 @@ import os
 import GPy
 
 
-def kl_gaussian(mu1, Sig1, mu2, Sig2, ridge=1e-9):
-  r = ridge*np.eye(mu1.shape[0])
-  #print(np.linalg.eigvalsh(Sig1+r).min())
-  #print(np.linalg.eigvalsh(Sig2+r).min())
-  k1 = np.trace(np.linalg.solve(Sig2+r, Sig1+r))
-  k2 = (mu1-mu2).T.dot( np.linalg.solve(Sig2+r, mu1-mu2   ))
-  k3 = np.linalg.slogdet(Sig2+r)[1] - np.linalg.slogdet(Sig1+r)[1]
-  return 0.5*( k1 + k2 + k3 - mu1.shape[0] )
-
-
-#GPy.kern.RBF(input_dim=X.shape[1], lengthscale=self.k.gamma, ARD=True, variance=self.k.sigma)
-
-
 ##create dataset generators
 d_seed = 1
 #dnms = ['synthetic', 'delays10k', 'abalone', 'kin8nm', 'airfoil']
@@ -35,35 +22,6 @@ d_seed = 1
 #            lambda s : gen_from_file('kin8nm', 6192, 2000, s),
 #            lambda s : gen_from_file('airfoil', 1103, 400, s)]
 
-
-#dnms = ['airfoil']
-#n_pretrain = [100]
-#datasets = [lambda s : gen_from_file('airfoil', 1103, 400, s)]
-
-
-#dnms = ['wine', 'ccpp', 'kin8nm'] #, 'sarcos']
-#n_pretrain = [300, 700, 600] #, 4000]
-#datasets = [lambda s : gen_from_file('wine', 3898, 1000, s),
-#            lambda s : gen_from_file('ccpp', 7568, 2000, s),
-#            lambda s : gen_from_file('kin8nm', 6192, 2000, s)]
-#            #lambda s : gen_from_file('sarcos', 30484, 14000, s)]
-
-
-
-
-#dnms = ['delays10k', 'abalone', 'airfoil', 'wine', 'ccpp']
-#n_pretrain = [800, 300, 100, 300, 700]
-#datasets = [lambda s : gen_from_file('delays10k', 8000, 2000, s),
-#            lambda s : gen_from_file('abalone', 3177, 1000, s),
-#            lambda s : gen_from_file('airfoil', 1103, 400, s),
-#            lambda s : gen_from_file('wine', 3898, 1000, s),
-#            lambda s : gen_from_file('ccpp', 7568, 2000, s)]
-#
-#
-#dnms = ['synthetic']
-#n_pretrain = [100]
-#datasets = [lambda s : gen_synthetic(1000, 1000, s)]
-
 dnms = ['synthetic', 'abalone', 'airfoil', 'wine', 'ccpp', 'delays10k']
 n_pretrain = [100, 300, 100, 300, 700, 800]
 datasets = [lambda s : gen_synthetic(1000, 1000, s),
@@ -73,10 +31,17 @@ datasets = [lambda s : gen_synthetic(1000, 1000, s),
             lambda s : gen_from_file('ccpp', 7568, 2000, s),
             lambda s : gen_from_file('delays10k', 8000, 2000, s)]
 
+dnms = ['synthetic', 'abalone', 'airfoil', 'ccpp', 'delays10k']
+n_pretrain = [100, 300, 100, 700, 800]
+datasets = [lambda s : gen_synthetic(1000, 1000, s),
+            lambda s : gen_from_file('abalone', 3177, 1000, s),
+            lambda s : gen_from_file('airfoil', 1103, 400, s),
+            lambda s : gen_from_file('ccpp', 7568, 2000, s),
+            lambda s : gen_from_file('delays10k', 8000, 2000, s)]
 
-            
 
-n_trials = 10
+
+n_trials = 20
 n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))[1:]
 #n_inducing = np.unique(np.logspace(0, 2, 5, dtype=np.int))
 n_inducing_hyperopt = 200

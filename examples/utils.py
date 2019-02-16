@@ -1,5 +1,15 @@
 import numpy as np
 
+def kl_gaussian(mu1, Sig1, mu2, Sig2, ridge=1e-9):
+  r = ridge*np.eye(mu1.shape[0])
+  #print(np.linalg.eigvalsh(Sig1+r).min())
+  #print(np.linalg.eigvalsh(Sig2+r).min())
+  k1 = np.trace(np.linalg.solve(Sig2+r, Sig1+r))
+  k2 = (mu1-mu2).T.dot( np.linalg.solve(Sig2+r, mu1-mu2   ))
+  k3 = np.linalg.slogdet(Sig2+r)[1] - np.linalg.slogdet(Sig1+r)[1]
+  return 0.5*( k1 + k2 + k3 - mu1.shape[0] )
+
+
 def gen_linear(N_train, N_test, seed):
   np.random.seed(seed)
   print('generating synthetic data')
@@ -17,8 +27,8 @@ def gen_synthetic(N_train, N_test, seed):
   np.random.seed(seed)
   print('generating synthetic data')
   N=N_train+N_test
-  likelihood_var = 0.01
-  X = 2*np.random.rand(N,1)
+  likelihood_var = 0.05
+  X = np.random.rand(N,1)
   Y = np.sin(12*X) + 0.66*np.cos(25*X) + np.random.randn(N,1)*np.sqrt(likelihood_var) + 3
   Xt = X[-N_test:, :]
   Yt = Y[-N_test:, :]
