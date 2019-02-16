@@ -33,7 +33,7 @@ for k in range(len(datasets)):
   #load/standardize data
   X, Y, Xt, Yt = dst(d_seed)
   #note that this function modifies in-place; the output isn't used
-  #Xmu, XZ, Ymu, YZ = standardize(X, Y, Xt, Yt)
+  Xmu, XZ, Ymu, YZ = standardize(X, Y, Xt, Yt)
 
   plots = []
   for axis in range(X.shape[1]):
