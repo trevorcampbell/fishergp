@@ -3,6 +3,7 @@ import bokeh.plotting as bkp
 import bokeh.layouts as bkl
 import bokeh.palettes
 from bokeh.io.export import export_png
+import bokeh.io as bki
 from bokeh.models import FuncTickFormatter
 from bokeh.models.tickers import FixedTicker
 import os
@@ -209,4 +210,5 @@ for k in range(len(dnms)):
             export_png(f, 'figures/%s%d.png' % (dnms[k], i+1))
     else:
         bkp.output_file(dnms[k] + '.html')
-        bkp.show(bkl.gridplot([figs]))
+        bki.save(bkl.gridplot([figs]))
+        #bkp.show(bkl.gridplot([figs]))
