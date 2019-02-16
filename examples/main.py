@@ -33,7 +33,7 @@ datasets = [lambda s : gen_synthetic(1000, 1000, s),
 
 
 
-n_trials = 20
+n_trials = 10
 n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))[1:]
 #n_inducing = np.unique(np.logspace(0, 2, 5, dtype=np.int))
 n_inducing_hyperopt = 200
