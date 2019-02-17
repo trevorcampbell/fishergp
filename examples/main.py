@@ -9,6 +9,7 @@ import bokeh.palettes
 import pickle as pk
 import time
 import os
+import sys
 import GPy
 
 
@@ -31,7 +32,7 @@ datasets = [lambda s : gen_synthetic(1000, 1000, s),
             lambda s : gen_from_file('wine', 3898, 1000, s),
             lambda s : gen_from_file('delays10k', 8000, 2000, s)]
 
-
+configs = dict(zip(dnms, zip(n_pretrain, datasets)))
 
 n_trials = 10
 n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))[1:]
@@ -47,9 +48,14 @@ n_inducing_hyperopt = 200
 check_hyper_stability = False
 
 #run trials, loading each dataset
-for k in range(len(datasets)):
-  dnm = dnms[k] 
-  dst = datasets[k]
+#for k in range(len(datasets)):
+#  dnm = dnms[k] 
+#  dst = datasets[k]
+for dnm in sys.argv[1:]:
+  if dnm not in configs:
+    print('"%s" is not a valid dataset name' % dnm)
+    continue
+  n_pt, dst = configs[dnm]
   print('Dataset: '+dnm)
   #load/standardize data
   print('Loading data...')
@@ -142,7 +148,7 @@ for k in range(len(datasets)):
   print('Running inference')
   for i in range(n_inducing.shape[0]):
     for t in range(n_trials):
-      print('Dataset: ' + dnm + ' ('+str(k+1)+'/'+str(len(datasets))+')')
+      print('Dataset: ' + dnm) # + ' ('+str(k+1)+'/'+str(len(datasets))+')')
       print('# Inducing pts: ' +str(n_inducing[i]) + ' (' + str(i+1)+'/'+str(n_inducing.shape[0])+')')
       print('Trial ' + str(t+1)+'/'+str(n_trials))
 
@@ -151,7 +157,7 @@ for k in range(len(datasets)):
       np.random.shuffle(idcs)
       subsample_idcs = idcs[:n_inducing[i]].copy()
       np.random.shuffle(idcs)
-      pretrain_subsample_idcs = idcs[:n_pretrain[k]].copy()
+      pretrain_subsample_idcs = idcs[:n_pt].copy()
       
       #run on each algorithm
       for j in range(len(algs)):
