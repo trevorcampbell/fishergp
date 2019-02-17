@@ -36,6 +36,7 @@ configs = dict(zip(dnms, zip(n_pretrain, datasets)))
 
 n_trials = 10
 n_inducing = np.unique(np.logspace(0, 3, 10, dtype=np.int))[1:]
+
 #n_inducing = np.unique(np.logspace(0, 2, 5, dtype=np.int))
 n_inducing_hyperopt = 200
 
@@ -46,6 +47,9 @@ n_inducing_hyperopt = 200
 #fixing hyperparameters between all methods is justified;
 #not needed for use in practice
 check_hyper_stability = False
+
+#if below is true, save objective values from fishergp and variationalgp
+save_objs = True
 
 #run trials, loading each dataset
 #for k in range(len(datasets)):
@@ -138,6 +142,8 @@ for dnm in sys.argv[1:]:
   lsc_errs = np.zeros((2, n_inducing.shape[0], n_trials))
   kvar_errs = np.zeros((2, n_inducing.shape[0], n_trials))
   lvar_errs = np.zeros((2, n_inducing.shape[0], n_trials))
+  opt_objs = np.zeros((2, n_inducing.shape[0], n_trials))
+
   inducing_pts = []
   for i in range(len(algs)):
     inducing_pts.append([])
@@ -182,6 +188,12 @@ for dnm in sys.argv[1:]:
         post_mean_errs[j, i, t] = np.sqrt(((mu_pred_full-mu_pred)**2).mean())
         post_sig_errs[j, i, t] = np.sqrt(((sig_pred_full-sig_pred)**2).mean())
         kl_divergences[j,i,t] = kl_gaussian(mu_pred_full, var_pred_full, mu_pred, var_pred)
+
+        if anms[j] == 'fisher_inducing' and save_objs:
+          opt_objs[j-(len(algs)-2), i, t] = algs[j]._objective(algs[j].X_ind, 0, 1e-9)
+        if anms[j] == 'variational_inducing' and save_objs:
+          opt_objs[j-(len(algs)-2), i, t] = algs[j].model.objective_function()
+          
         if (anms[j] == 'variational_inducing' or anms[j] == 'fisher_inducing') and check_hyper_stability:
           print('before post hyperopt: ')
           print(length_scales)
@@ -212,7 +224,7 @@ for dnm in sys.argv[1:]:
   np.savez('results/'+dnm+'_'+str(d_seed)+'_results.npz', n_inducing=n_inducing, anms=anms,  
                                 pretrain_cputs=pretrain_cputs, train_cputs=train_cputs, pred_cputs=pred_cputs, 
                                 pred_errs=pred_errs, post_mean_errs=post_mean_errs, post_sig_errs=post_sig_errs, kl_divergences=kl_divergences,    
-                                lsc_errs=lsc_errs, kvar_errs=kvar_errs, lvar_errs=lvar_errs)
+                                lsc_errs=lsc_errs, kvar_errs=kvar_errs, lvar_errs=lvar_errs, opt_objs=opt_objs)
   f = open('results/'+dnm+'_'+str(d_seed)+'_inducing_pts.pk', 'wb')
   pk.dump(inducing_pts, f)
   f.close()
