@@ -102,6 +102,7 @@ for k in range(len(dnms)):
     kvar_errs = res['kvar_errs']
     lvar_errs = res['lvar_errs']
     kl = res['kl_divergences']
+    objs = res['opt_objs']
 
     res = np.load('results/'+dnms[k]+'_'+str(d_seed)+'_full_results.npz')
     mu_pred_full = res['mu_pred_full']
@@ -116,14 +117,15 @@ for k in range(len(dnms)):
     f_pse_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pme_best_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error (best)', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pse_best_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error (best)', x_axis_type='log', x_axis_label='# Inducing Pts')
-
+    f_pme_obj_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error (best obj)', x_axis_type='log', x_axis_label='# Inducing Pts')
+    f_pse_obj_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error (best obj)', x_axis_type='log', x_axis_label='# Inducing Pts')
     #f_pe_vs_cput = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Test Prediction Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     #f_pme_vs_cput = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     #f_pse_vs_cput = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error', x_axis_type='log',  x_axis_label='# Inducing Pts')
 
     hypchg_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='Relative HyperParam Change', x_axis_type='log', x_axis_label='# Inducing Pts')
 
-    for f in [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni, hypchg_vs_ni]:
+    for f in [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pme_obj_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni, f_pse_obj_vs_ni, hypchg_vs_ni]:
         f.xaxis.axis_label_text_font_size= font_size
         f.xaxis.major_label_text_font_size= font_size
         f.xaxis.formatter = logFmtr
@@ -169,6 +171,8 @@ for k in range(len(dnms)):
         pse_mean = post_sig_errs[j, :, :].mean(axis=1)
         pse_std = post_sig_errs[j, :, :].std(axis=1)
         pse_best = post_sig_errs[j, :, :].min(axis=1)
+        best_objs_vfe = np.argmax(objs[0, :, :], axis=1)
+        best_objs_pfd = np.argmax(objs[1, :, :], axis=1)
 
         f_kl_vs_ni.line(eff_num_inducing[:-1], kl_mean[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
         f_pme_vs_ni.line(eff_num_inducing[:-1], pme_mean[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
@@ -178,14 +182,22 @@ for k in range(len(dnms)):
         #f_pme_vs_cput.line(cput_mean, pme_mean, legend=anm_legend, line_width=7, line_color=colors[j])
         #f_pse_vs_cput.line(cput_mean, pse_mean, legend=anm_legend, line_width=7, line_color=colors[j])
 
+        if anms[j] != 'variational_inducing' and anms[j] != 'fisher_inducing':
+            f_pme_obj_vs_ni.line(eff_num_inducing[:-1], pme_best[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pse_obj_vs_ni.line(eff_num_inducing[:-1], pse_best[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
+
         if anms[j] == 'variational_inducing':
-            hypchg_vs_ni.line(n_inducing, lsc_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
-            hypchg_vs_ni.line(n_inducing, kvar_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
-            hypchg_vs_ni.line(n_inducing, lvar_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
+            hypchg_vs_ni.line(eff_num_inducing[:-1], lsc_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
+            hypchg_vs_ni.line(eff_num_inducing[:-1], kvar_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
+            hypchg_vs_ni.line(eff_num_inducing[:-1], lvar_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pme_obj_vs_ni.line(eff_num_inducing[:-1], post_mean_errors[0, np.arange(post_mean_errors.shape[1]), best_objs_vfe], legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pse_obj_vs_ni.line(eff_num_inducing[:-1], post_sig_errors[0, np.arange(post_sig_errors.shape[1]), best_objs_vfe], legend=anm_legend, line_width=7, line_color=colors[j])
         if anms[j] == 'fisher_inducing':
-            hypchg_vs_ni.line(n_inducing, lsc_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
-            hypchg_vs_ni.line(n_inducing, kvar_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
-            hypchg_vs_ni.line(n_inducing, lvar_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
+            hypchg_vs_ni.line(eff_num_inducing[:-1], lsc_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
+            hypchg_vs_ni.line(eff_num_inducing[:-1], kvar_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
+            hypchg_vs_ni.line(eff_num_inducing[:-1], lvar_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pme_obj_vs_ni.line(eff_num_inducing[:-1], post_mean_errors[1, np.arange(post_mean_errors.shape[1]), best_objs_pfd], legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pse_obj_vs_ni.line(eff_num_inducing[:-1], post_sig_errors[1, np.arange(post_sig_errors.shape[1]), best_objs_pfd], legend=anm_legend, line_width=7, line_color=colors[j])
 
     for f in [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni, hypchg_vs_ni]:
         f.legend.label_text_font_size= font_size
@@ -204,7 +216,7 @@ for k in range(len(dnms)):
 
 
     #bkp.show(bkl.gridplot([[f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni], [f_pe_vs_cput, f_pme_vs_cput, f_pse_vs_cput]]))
-    figs = [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni,  hypchg_vs_ni]
+    figs = [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pme_obj_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni, f_pse_obj_vs_ni, hypchg_vs_ni]
     if pngs:
         for i, f in enumerate(figs):
             export_png(f, 'figures/%s%d.png' % (dnms[k], i+1))
