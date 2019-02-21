@@ -171,8 +171,8 @@ for k in range(len(dnms)):
         pse_mean = post_sig_errs[j, :, :].mean(axis=1)
         pse_std = post_sig_errs[j, :, :].std(axis=1)
         pse_best = post_sig_errs[j, :, :].min(axis=1)
-        best_objs_vfe = np.argmax(objs[0, :, :], axis=1)
-        best_objs_pfd = np.argmax(objs[1, :, :], axis=1)
+        best_objs_vfe = np.argmin(objs[0, :, :], axis=1)
+        best_objs_pfd = np.argmin(objs[1, :, :], axis=1)
 
         f_kl_vs_ni.line(eff_num_inducing[:-1], kl_mean[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
         f_pme_vs_ni.line(eff_num_inducing[:-1], pme_mean[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
@@ -190,14 +190,14 @@ for k in range(len(dnms)):
             hypchg_vs_ni.line(eff_num_inducing[:-1], lsc_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
             hypchg_vs_ni.line(eff_num_inducing[:-1], kvar_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
             hypchg_vs_ni.line(eff_num_inducing[:-1], lvar_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
-            f_pme_obj_vs_ni.line(eff_num_inducing[:-1], post_mean_errors[0, np.arange(post_mean_errors.shape[1]), best_objs_vfe], legend=anm_legend, line_width=7, line_color=colors[j])
-            f_pse_obj_vs_ni.line(eff_num_inducing[:-1], post_sig_errors[0, np.arange(post_sig_errors.shape[1]), best_objs_vfe], legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pme_obj_vs_ni.line(eff_num_inducing[:-1], post_mean_errs[0, np.arange(post_mean_errs.shape[1]), best_objs_vfe], legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pse_obj_vs_ni.line(eff_num_inducing[:-1], post_sig_errs[0, np.arange(post_sig_errs.shape[1]), best_objs_vfe], legend=anm_legend, line_width=7, line_color=colors[j])
         if anms[j] == 'fisher_inducing':
             hypchg_vs_ni.line(eff_num_inducing[:-1], lsc_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
             hypchg_vs_ni.line(eff_num_inducing[:-1], kvar_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
             hypchg_vs_ni.line(eff_num_inducing[:-1], lvar_errs[1, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
-            f_pme_obj_vs_ni.line(eff_num_inducing[:-1], post_mean_errors[1, np.arange(post_mean_errors.shape[1]), best_objs_pfd], legend=anm_legend, line_width=7, line_color=colors[j])
-            f_pse_obj_vs_ni.line(eff_num_inducing[:-1], post_sig_errors[1, np.arange(post_sig_errors.shape[1]), best_objs_pfd], legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pme_obj_vs_ni.line(eff_num_inducing[:-1], post_mean_errs[1, np.arange(post_mean_errs.shape[1]), best_objs_pfd], legend=anm_legend, line_width=7, line_color=colors[j])
+            f_pse_obj_vs_ni.line(eff_num_inducing[:-1], post_sig_errs[1, np.arange(post_sig_errs.shape[1]), best_objs_pfd], legend=anm_legend, line_width=7, line_color=colors[j])
 
     for f in [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni, hypchg_vs_ni]:
         f.legend.label_text_font_size= font_size
