@@ -182,9 +182,9 @@ for k in range(len(dnms)):
         #f_pme_vs_cput.line(cput_mean, pme_mean, legend=anm_legend, line_width=7, line_color=colors[j])
         #f_pse_vs_cput.line(cput_mean, pse_mean, legend=anm_legend, line_width=7, line_color=colors[j])
 
-        if anms[j] != 'variational_inducing' and anms[j] != 'fisher_inducing':
-            f_pme_obj_vs_ni.line(eff_num_inducing[:-1], pme_best[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
-            f_pse_obj_vs_ni.line(eff_num_inducing[:-1], pse_best[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
+        #if anms[j] != 'variational_inducing' and anms[j] != 'fisher_inducing':
+        #    f_pme_obj_vs_ni.line(eff_num_inducing[:-1], pme_best[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
+        #    f_pse_obj_vs_ni.line(eff_num_inducing[:-1], pse_best[:-1], legend=anm_legend, line_width=7, line_color=colors[j])
 
         if anms[j] == 'variational_inducing':
             hypchg_vs_ni.line(eff_num_inducing[:-1], lsc_errs[0, :, :].mean(axis=1), legend=anm_legend, line_width=7, line_color=colors[j])
