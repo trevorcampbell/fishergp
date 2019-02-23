@@ -45,6 +45,8 @@ save_objs = True
 #number of points to use for hyperparameter optimization
 n_inducing_hyperopt = 200
 
+print(sys.argv)
+
 full = True
 try:
   dnm = sys.argv[1]
@@ -52,10 +54,11 @@ try:
     full = False
     n_inducing = int(sys.argv[2])
     n_trial = int(sys.argv[3])
-  if len(sys.argv) != 2 or len(sys.argv) != 4:
+  if len(sys.argv) != 2 and len(sys.argv) != 4:
     raise
 except:
   print('Need to call this script as: python3 main_single.py [dataset_name] [num_inducing] [trial_num] OR python3 main_single.py [dataset_name]')
+  quit()
 
 if dnm not in configs or n_inducing <= 0 or n_trial < 0:
   print('Command line arg error')
@@ -65,6 +68,7 @@ if dnm not in configs or n_inducing <= 0 or n_trial < 0:
   print('n_inducing: ' + str(n_inducing))
   quit()
 
+print(full)
 
 n_pt, dst = configs[dnm]
 print('Dataset: '+dnm)
@@ -76,9 +80,10 @@ print('Standardizing...')
 Xmu, XZ, Ymu, YZ = standardize(X, Y, Xt, Yt)
 
 #just tune kernel and full gp results
+krnprm_fn = 'results/'+dnm+'_krn_'+str(d_seed)+'.npy'
+full_results_fn = 'results/'+dnm+'_'+str(d_seed)+'_full_results.npz'
 if full:
   #load/optimize kernel parameters
-  krnprm_fn = 'results/'+dnm+'_krn_'+str(d_seed)+'.npy'
   if os.path.exists(krnprm_fn):
     print('Loading parameters')
     krnprms = np.load(krnprm_fn)
@@ -106,7 +111,6 @@ if full:
   gp = SubsampleGP(X, Y, kern, likelihood_variance)
   
   print('Training full GP')
-  full_results_fn = 'results/'+dnm+'_'+str(d_seed)+'_full_results.npz'
   if os.path.exists(full_results_fn):
     print('Found full GP results. Loading...')
     fres = np.load(full_results_fn)
@@ -138,7 +142,6 @@ else:
     length_scales = krnprms[2:]
   else:
     raise Exception('No kernel parameters found! rerun python3 main.py '+dnm)
-  full_results_fn = 'results/'+dnm+'_'+str(d_seed)+'_full_results.npz'
   if os.path.exists(full_results_fn):
     print('Found full GP results. Loading...')
     fres = np.load(full_results_fn)
@@ -150,6 +153,7 @@ else:
     train_cput_full = fres['train_cput_full']
   else:
     raise Exception('No full GP results found! rerun python3 main.py '+dnm)
+
   results_fn = 'results/'+dnm+'_'+str(d_seed)+'_'+str(n_inducing)+'_'+str(n_trial)+'_results.npz'
   inducing_fn = 'results/'+dnm+'_'+str(d_seed)+'_'+str(n_inducing)+'_'+str(n_trial)+'_inducing.pk'
   if os.path.exists(results_fn) and os.path.exists(inducing_fn):
