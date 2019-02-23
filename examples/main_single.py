@@ -44,6 +44,7 @@ save_objs = True
 
 #number of points to use for hyperparameter optimization
 n_inducing_hyperopt = 200
+n_inducing_array = np.unique(np.logspace(0, 3, 10, dtype=np.int))[1:]
 
 print(sys.argv)
 
@@ -52,7 +53,8 @@ try:
   dnm = sys.argv[1]
   if len(sys.argv) == 4:
     full = False
-    n_inducing = int(sys.argv[2])
+    n_inducing_ind = int(sys.argv[2])
+    n_inducing = n_inducing_array[n_inducing_ind]
     n_trial = int(sys.argv[3])
   if len(sys.argv) != 2 and len(sys.argv) != 4:
     raise
