@@ -117,8 +117,8 @@ for k in range(len(dnms)):
     f_pse_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pme_best_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error (best)', x_axis_type='log', x_axis_label='# Inducing Pts')
     f_pse_best_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error (best)', x_axis_type='log', x_axis_label='# Inducing Pts')
-    f_pme_obj_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error (best obj)', x_axis_type='log', x_axis_label='# Inducing Pts')
-    f_pse_obj_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error (best obj)', x_axis_type='log', x_axis_label='# Inducing Pts')
+    f_pme_obj_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error', x_axis_type='log', x_axis_label='# Inducing Pts')
+    f_pse_obj_vs_ni = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     #f_pe_vs_cput = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Test Prediction Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     #f_pme_vs_cput = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior Mean Error', x_axis_type='log', x_axis_label='# Inducing Pts')
     #f_pse_vs_cput = bkp.figure(plot_width=1250, plot_height=1250, y_axis_type='log', y_axis_label='RMSE Posterior StdDev Error', x_axis_type='log',  x_axis_label='# Inducing Pts')
@@ -134,14 +134,15 @@ for k in range(len(dnms)):
         f.yaxis.formatter = logFmtr
         f.title.text_font_size = font_size
 
-    if legend:
-        f_pe_vs_ni.line(n_inducing, pred_err_full*np.ones(n_inducing.shape[0]), legend=anms_dict['full'], line_width=7, line_color='black')
-    else:
-        f_pe_vs_ni.line(n_inducing, pred_err_full*np.ones(n_inducing.shape[0]), line_width=7, line_color='black')
+    min_n_inducing = n_inducing[0]**1.5 / np.sqrt(dset_sizes[dnms[k]])
+    #if legend:
+    f_pe_vs_ni.line([min_n_inducing, n_inducing[-1]], pred_err_full*np.ones(2), legend=anms_dict['full'] if legend else None, line_width=7, line_color='black')
+    # else:
+    #    f_pe_vs_ni.line([min_n_inducing, n_inducing[-1]], pred_err_full*np.ones(2), line_width=7, line_color='black')
 
     for j in range(len(anms)):
-        #if anms[j] == 'linear':
-        #    continue
+        if anms[j] == 'linear':
+           continue
         pe_mean = pred_errs[j, :, :].mean(axis=1)
         pe_std = pred_errs[j, :, :].std(axis=1)
 
@@ -158,6 +159,7 @@ for k in range(len(dnms)):
 
         if anms[j] == 'subsample':
             eff_num_inducing = n_inducing**1.5 / np.sqrt(dset_sizes[dnms[k]])
+            print(eff_num_inducing)
         else:
             eff_num_inducing = n_inducing
 
@@ -199,14 +201,18 @@ for k in range(len(dnms)):
             f_pme_obj_vs_ni.line(eff_num_inducing[:-1], post_mean_errs[1, np.arange(post_mean_errs.shape[1]), best_objs_pfd], legend=anm_legend, line_width=7, line_color=colors[j])
             f_pse_obj_vs_ni.line(eff_num_inducing[:-1], post_sig_errs[1, np.arange(post_sig_errs.shape[1]), best_objs_pfd], legend=anm_legend, line_width=7, line_color=colors[j])
 
-    for f in [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni, hypchg_vs_ni]:
-        f.legend.label_text_font_size= font_size
-        f.legend.glyph_width=100
-        f.legend.glyph_height=40
-        f.legend.spacing=20
+    if legend:
+        for f in [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni, f_pme_obj_vs_ni, f_pse_obj_vs_ni, hypchg_vs_ni]:
+            f.legend.label_text_font_size = font_size
+            f.legend.glyph_width = 100
+            f.legend.glyph_height = 40
+            f.legend.spacing = 20
 
-    for f in [f_pme_vs_ni, f_pse_vs_ni]:
-        f.legend.location = 'bottom_left'
+        for f in [f_pme_vs_ni, f_pse_vs_ni]:
+            f.legend.location = 'bottom_left'
+
+        f_kl_vs_ni.legend.location = 'center_left'
+        f_pe_vs_ni.legend.location = 'center_left'
 
     if dnms[k] == 'delays10k':
         f_pme_vs_ni.yaxis.ticker = FixedTicker(ticks=[0.1, 0.4, 0.7])
@@ -216,11 +222,12 @@ for k in range(len(dnms)):
 
 
     #bkp.show(bkl.gridplot([[f_pe_vs_ni, f_pme_vs_ni, f_pse_vs_ni], [f_pe_vs_cput, f_pme_vs_cput, f_pse_vs_cput]]))
-    figs = [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pme_obj_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni, f_pse_obj_vs_ni, hypchg_vs_ni]
+    #figs = [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_best_vs_ni, f_pme_obj_vs_ni, f_pse_vs_ni, f_pse_best_vs_ni, f_pse_obj_vs_ni, hypchg_vs_ni]
+    figs = [f_kl_vs_ni, f_pe_vs_ni, f_pme_vs_ni, f_pme_obj_vs_ni, f_pse_vs_ni, f_pse_obj_vs_ni]
     if pngs:
         for i, f in enumerate(figs):
             export_png(f, 'figures/%s%d.png' % (dnms[k], i+1))
     else:
-        bkp.output_file(dnms[k] + '.html')
+        bkp.output_file('figures/' + dnms[k] + '.html')
         bki.save(bkl.gridplot([figs]))
         #bkp.show(bkl.gridplot([figs]))

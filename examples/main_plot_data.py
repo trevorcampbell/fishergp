@@ -2,11 +2,12 @@ import numpy as np
 from utils import kl_gaussian, gen_synthetic, gen_linear, gen_from_file, standardize
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
-import bokeh.palettes 
+import bokeh.palettes
 import bokeh.io as bki
 import pickle as pk
 import time
 import os
+import sys
 import GPy
 
 
@@ -20,16 +21,22 @@ datasets = [lambda s : gen_synthetic(1000, 1000, s),
             lambda s : gen_from_file('ccpp', 7568, 2000, s),
             lambda s : gen_from_file('delays10k', 8000, 2000, s)]
 
-dnms = ['synthetic']
-datasets = [lambda s : gen_synthetic(1000, 1000, s)]
-            
+# dnms = ['synthetic']
+# datasets = [lambda s : gen_synthetic(1000, 1000, s)]
+
+configs = dict(zip(dnms, zip(n_pretrain, datasets)))
 
 
 d_seed =1
-for k in range(len(datasets)):
+#for k in range(len(datasets)):
+for dnm in sys.argv[1:]:
+  if dnm not in configs:
+    print('"%s" is not a valid dataset name' % dnm)
+    continue
+  n_pt, dst = configs[dnm]
   res = np.array([])
-  dnm = dnms[k] 
-  dst = datasets[k]
+  # dnm = dnms[k]
+  # dst = datasets[k]
   #load/standardize data
   X, Y, Xt, Yt = dst(d_seed)
   #note that this function modifies in-place; the output isn't used
@@ -58,14 +65,5 @@ for k in range(len(datasets)):
     fig.line(Xt.flatten(), mu_pred_full+sig_pred_full, line_color='red')
     fig.line(Xt.flatten(), mu_pred_full-sig_pred_full, line_color='red')
     plots.append(fig)
-  bkp.output_file(dnms[k] + '.html')
+  bkp.output_file(dnm + '.html')
   bki.save(bkl.gridplot([plots]))
-
-
-
-
-
-
-
-
-

@@ -5,7 +5,7 @@ from fishergp.utils import optimize_hyperparameters
 from fishergp.kernels import GaussianKernel
 import bokeh.plotting as bkp
 import bokeh.layouts as bkl
-import bokeh.palettes 
+import bokeh.palettes
 import pickle as pk
 import time
 import os
@@ -53,7 +53,7 @@ save_objs = True
 
 #run trials, loading each dataset
 #for k in range(len(datasets)):
-#  dnm = dnms[k] 
+#  dnm = dnms[k]
 #  dst = datasets[k]
 for dnm in sys.argv[1:]:
   if dnm not in configs:
@@ -79,7 +79,7 @@ for dnm in sys.argv[1:]:
   else:
     print('No saved parameters found. Optimizing...')
     kern, like  = optimize_hyperparameters(X, Y, n_inducing_hyperopt,
-                                      		GPy.kern.RBF(input_dim=X.shape[1], ARD=True), 
+                                      		GPy.kern.RBF(input_dim=X.shape[1], ARD=True),
                                                 GPy.likelihoods.Gaussian()
                                                 )
     length_scales = kern.lengthscale
@@ -106,7 +106,7 @@ for dnm in sys.argv[1:]:
   #store algs in a list
   anms = ['linear', 'subsample', 'subset_regressors', 'variational_inducing', 'fisher_inducing']
   algs = [lin, sgp, srgp, vgp, igp]
-  
+
   print('Training full GP')
   full_results_fn = 'results/'+dnm+'_'+str(d_seed)+'_full_results.npz'
   if os.path.exists(full_results_fn):
@@ -126,11 +126,11 @@ for dnm in sys.argv[1:]:
     t0 = time.time()
     mu_pred_full, var_pred_full = gp.predict_f(Xt, cov_type='full')
     sig_pred_full = np.sqrt(np.diag(var_pred_full))
-    pred_cput_full = time.time()-t0 
+    pred_cput_full = time.time()-t0
     pred_err_full = np.sqrt(((mu_pred_full - Yt)**2).mean())
     np.savez(full_results_fn, mu_pred_full=mu_pred_full, sig_pred_full=sig_pred_full, var_pred_full=var_pred_full,
                              train_cput_full=train_cput_full, pred_cput_full=pred_cput_full, pred_err_full=pred_err_full)
-     
+
   #initialize results matrices
   pretrain_cputs = np.zeros((len(algs), n_inducing.shape[0], n_trials))
   train_cputs = np.zeros((len(algs), n_inducing.shape[0], n_trials))
@@ -164,7 +164,7 @@ for dnm in sys.argv[1:]:
       subsample_idcs = idcs[:n_inducing[i]].copy()
       np.random.shuffle(idcs)
       pretrain_subsample_idcs = idcs[:n_pt].copy()
-      
+
       #run on each algorithm
       for j in range(len(algs)):
         print('Training ' + anms[j])
@@ -193,7 +193,7 @@ for dnm in sys.argv[1:]:
           opt_objs[j-(len(algs)-2), i, t] = algs[j]._objective(algs[j].X_ind, 0, 1e-9)
         if anms[j] == 'variational_inducing' and save_objs:
           opt_objs[j-(len(algs)-2), i, t] = algs[j].model.objective_function()
-          
+
         if (anms[j] == 'variational_inducing' or anms[j] == 'fisher_inducing') and check_hyper_stability:
           print('before post hyperopt: ')
           print(length_scales)
@@ -201,7 +201,7 @@ for dnm in sys.argv[1:]:
           print(likelihood_variance)
 
           kern, like  = optimize_hyperparameters(X, Y, algs[j].X_ind,
-                                      		GPy.kern.RBF(input_dim=X.shape[1], lengthscale=length_scales, variance=kernel_variance, ARD=True), 
+                                      		GPy.kern.RBF(input_dim=X.shape[1], lengthscale=length_scales, variance=kernel_variance, ARD=True),
                                                 GPy.likelihoods.Gaussian(variance=likelihood_variance)
                                                 )
           lsc = kern.lengthscale
@@ -220,12 +220,11 @@ for dnm in sys.argv[1:]:
           lsc_errs[j-(len(algs)-2), i, t] =  np.sqrt( ((lsc - length_scales)**2).sum())/np.sqrt((length_scales**2).sum())
           kvar_errs[j-(len(algs)-2), i, t] =  np.fabs(kvar-kernel_variance)/np.fabs(kernel_variance)
           lvar_errs[j-(len(algs)-2), i, t] =  np.fabs(lvar - likelihood_variance)/np.fabs(likelihood_variance)
-          
-  np.savez('results/'+dnm+'_'+str(d_seed)+'_results.npz', n_inducing=n_inducing, anms=anms,  
-                                pretrain_cputs=pretrain_cputs, train_cputs=train_cputs, pred_cputs=pred_cputs, 
-                                pred_errs=pred_errs, post_mean_errs=post_mean_errs, post_sig_errs=post_sig_errs, kl_divergences=kl_divergences,    
+
+  np.savez('results/'+dnm+'_'+str(d_seed)+'_results.npz', n_inducing=n_inducing, anms=anms,
+                                pretrain_cputs=pretrain_cputs, train_cputs=train_cputs, pred_cputs=pred_cputs,
+                                pred_errs=pred_errs, post_mean_errs=post_mean_errs, post_sig_errs=post_sig_errs, kl_divergences=kl_divergences,
                                 lsc_errs=lsc_errs, kvar_errs=kvar_errs, lvar_errs=lvar_errs, opt_objs=opt_objs)
   f = open('results/'+dnm+'_'+str(d_seed)+'_inducing_pts.pk', 'wb')
   pk.dump(inducing_pts, f)
   f.close()
-
